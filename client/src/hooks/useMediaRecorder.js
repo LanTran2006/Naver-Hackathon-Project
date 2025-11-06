@@ -4,6 +4,7 @@ export default function useMediaRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [recordedUrl, setRecordedUrl] = useState(null);
+  const [videoBlob, setVideoBlob] = useState(null);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const videoRef = useRef(null);
@@ -31,6 +32,7 @@ export default function useMediaRecorder() {
         const blob = new Blob(chunksRef.current, { type: "video/webm" });
         const url = URL.createObjectURL(blob);
         setRecordedUrl(url);
+        setVideoBlob(blob);
         if (videoRef.current) {
           videoRef.current.srcObject = null;
         }
@@ -81,6 +83,7 @@ export default function useMediaRecorder() {
 
   const resetRecording = () => {
     setRecordedUrl(null);
+    setVideoBlob(null);
     chunksRef.current = [];
   };
 
@@ -89,6 +92,7 @@ export default function useMediaRecorder() {
     isPaused,
     recordedUrl,
     videoRef,
+    videoBlob,
     startRecording,
     pauseRecording,
     resumeRecording,
@@ -96,5 +100,3 @@ export default function useMediaRecorder() {
     resetRecording,
   };
 }
-
-

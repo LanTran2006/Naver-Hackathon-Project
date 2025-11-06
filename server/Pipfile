@@ -4,12 +4,21 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-fastapi = "*"
-uvicorn = "*"
 pymongo = "*"
 pydantic = {extras = ["email"], version = "*"}
+fastapi = {extras = ["all"], version = "*"}
+uvicorn = "*"
+transformers = "*"
+torch = "*"
+opencv-python-headless = "*"
+numpy = "*"
+pillow = "*"
+tensorflow = "*"
+mediapipe = "*"
+scikit-learn = "*"
+exceptiongroup = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.14"
+python_version = "3.13.5"

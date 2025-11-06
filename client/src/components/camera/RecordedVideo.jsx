@@ -1,4 +1,4 @@
-function RecordedVideo({ recordedUrl, onRecordAgain }) {
+function RecordedVideo({ recordedUrl, onRecordAgain, onTranslate, isLoading }) {
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-4">Recorded Video</h2>
@@ -21,6 +21,13 @@ function RecordedVideo({ recordedUrl, onRecordAgain }) {
         >
           Download
         </a>
+        <button
+          onClick={onTranslate}
+          disabled={isLoading}
+          className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 text-sm rounded cursor-pointer m-1.5 disabled:bg-green-300"
+        >
+          {isLoading ? "Translating..." : "Translated Video"}
+        </button>
       </div>
     </div>
   );
