@@ -40,7 +40,7 @@ function Record() {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/translate-sign-language/",
+        `${import.meta.env.VITE_API_URL}/translate-sign-language`,
         {
           method: "POST",
           body: formData,
