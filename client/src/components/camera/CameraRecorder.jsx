@@ -73,11 +73,11 @@ function CameraRecorder() {
   };
 
   return (
-    <div className="text-center p-5">
-      <h1 className="text-3xl font-bold mb-5">Ghi hình Camera</h1>
+    <div className="text-center p-3 md:p-5">
+      <h1 className="text-2xl md:text-3xl font-bold mb-3 md:mb-5">Ghi hình Camera</h1>
       <CameraPermissionCard isPrepared={isPrepared} prepareRecording={prepareRecording} ref={videoRef}/>
       
-      <div className="flex justify-center gap-2 mt-3 items-center">
+      <div className="flex flex-row flex-wrap justify-center gap-2 mt-3 items-center">
         {!isRecording && (
           <StartButton onStart={startRecording} disabled={!isPrepared}/>
         )}
@@ -92,7 +92,7 @@ function CameraRecorder() {
         )}
         
         <button
-          className="bg-green-100 hover:bg-green-500 px-8 py-4 text-base rounded-full cursor-pointer m-2.5"
+          className="bg-green-100 hover:bg-green-500 px-4 md:px-8 py-3 md:py-4 text-sm md:text-base rounded-full cursor-pointer"
         >
           Ghi âm thanh
         </button>
@@ -107,10 +107,10 @@ function CameraRecorder() {
         />
       )}
 
-      <div className="mt-5">
-        {isLoading && <p className="text-lg text-blue-600">Đang xử lý...</p>}
+      <div className="mt-5 px-3">
+        {isLoading && <p className="text-base md:text-lg text-blue-600">Đang xử lý...</p>}
         {translation && (
-          <h3 className="text-2xl font-bold text-green-700">{translation}</h3>
+          <h3 className="text-xl md:text-2xl font-bold text-green-700 wrap-break-word">{translation}</h3>
         )}
       </div>
     </div>
