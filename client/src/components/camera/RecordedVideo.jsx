@@ -1,7 +1,7 @@
 function RecordedVideo({ recordedUrl, onRecordAgain, onTranslate, isLoading }) {
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4">Recorded Video</h2>
+      <h2 className="text-2xl font-semibold mb-4">Video đã ghi</h2>
       <video
         src={recordedUrl}
         controls
@@ -12,21 +12,21 @@ function RecordedVideo({ recordedUrl, onRecordAgain, onTranslate, isLoading }) {
           onClick={onRecordAgain}
           className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 text-sm rounded cursor-pointer m-1.5"
         >
-          Record Again
+          Ghi lại
         </button>
         <a
           href={recordedUrl}
           download="recording.webm"
           className="inline-block bg-green-500 hover:bg-green-600 text-white px-6 py-3 text-sm rounded cursor-pointer m-1.5 no-underline"
         >
-          Download
+          Tải xuống
         </a>
         <button
           onClick={onTranslate}
           disabled={isLoading}
           className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 text-sm rounded cursor-pointer m-1.5 disabled:bg-green-300"
         >
-          {isLoading ? "Translating..." : "Translated Video"}
+          {isLoading ? "Đang dịch..." : "Dịch video"}
         </button>
       </div>
     </div>

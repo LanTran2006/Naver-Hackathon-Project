@@ -1,50 +1,63 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function useMediaRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [isPrepared, setIsPrepared] = useState(false);
   const [recordedUrl, setRecordedUrl] = useState(null);
   const [videoBlob, setVideoBlob] = useState(null);
+  let [stream, setStream] = useState(null);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const videoRef = useRef(null);
-
-  const startRecording = async () => {
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+      mediaRecorderRef.current?.stop();
+      if (recordedUrl) {
+        URL.revokeObjectURL(recordedUrl);
+      }
+    };
+  }, [stream, recordedUrl]);
+  const prepareRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const str = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true,
       });
-
-      videoRef.current.srcObject = stream;
-
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          chunksRef.current.push(event.data);
-        }
-      };
-
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "video/webm" });
-        const url = URL.createObjectURL(blob);
-        setRecordedUrl(url);
-        setVideoBlob(blob);
-        if (videoRef.current) {
-          videoRef.current.srcObject = null;
-        }
-      };
-
-      mediaRecorder.start();
-      setIsRecording(true);
-      setIsPaused(false);
+      videoRef.current.srcObject = str;
+      setIsPrepared(true);
+      setStream(str);
     } catch (error) {
-      console.error("Error accessing camera:", error);
-      alert("Could not access camera. Please grant permission.");
+      console.log(error);
     }
+  };
+  const startRecording = async () => {
+    const mediaRecorder = new MediaRecorder(stream);
+    mediaRecorderRef.current = mediaRecorder;
+    chunksRef.current = [];
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        chunksRef.current.push(event.data);
+      }
+    };
+
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunksRef.current, { type: "video/webm" });
+      const url = URL.createObjectURL(blob);
+      setRecordedUrl(url);
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+    };
+    mediaRecorder.start();
+    setIsRecording(true);
+    setIsPaused(false);
   };
 
   const pauseRecording = () => {
@@ -78,18 +91,21 @@ export default function useMediaRecorder() {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       setIsPaused(false);
+      setIsPrepared(false);
     }
   };
 
-  const resetRecording = () => {
+  const resetRecording = async () => {
     setRecordedUrl(null);
     setVideoBlob(null);
     chunksRef.current = [];
+    prepareRecording();
   };
 
   return {
     isRecording,
     isPaused,
+    isPrepared,
     recordedUrl,
     videoRef,
     videoBlob,
@@ -98,5 +114,6 @@ export default function useMediaRecorder() {
     resumeRecording,
     stopRecording,
     resetRecording,
+    prepareRecording,
   };
 }

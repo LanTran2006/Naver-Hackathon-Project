@@ -1,10 +1,15 @@
-function StartButton({ onStart }) {
+function StartButton({ onStart, disabled }) {
   return (
     <button
       onClick={onStart}
-      className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 text-base rounded cursor-pointer m-2.5"
+      disabled={disabled}
+      className={`px-8 py-4 text-base rounded-full cursor-pointer m-2.5 ${
+        disabled 
+          ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+          : 'bg-green-500 hover:bg-green-600 text-white'
+      }`}
     >
-      Start Recording
+      Bắt đầu ghi hình
     </button>
   );
 }

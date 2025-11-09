@@ -4,20 +4,23 @@ import RecordingControls from "./RecordingControls";
 import RecordedVideo from "./RecordedVideo";
 import useMediaRecorder from "../../hooks/useMediaRecorder";
 import { useState } from "react";
+import CameraPermissionCard from "./CameraPermissionCard";
 
 function CameraRecorder() {
   const {
-    isRecording,
-    isPaused,
-    recordedUrl,
-    videoRef,
-    videoBlob,
-    startRecording,
-    pauseRecording,
-    resumeRecording,
-    stopRecording,
-    resetRecording,
-  } = useMediaRecorder();
+      isRecording,
+      isPaused,
+      isPrepared,
+      recordedUrl,
+      videoRef,
+      videoBlob,
+      startRecording,
+      pauseRecording,
+      resumeRecording,
+      stopRecording,
+      resetRecording,
+      prepareRecording
+    } = useMediaRecorder();
 
   const [translation, setTranslation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -71,12 +74,14 @@ function CameraRecorder() {
 
   return (
     <div className="text-center p-5">
-      <h1 className="text-3xl font-bold mb-2">Camera Recorder</h1>
-
-      {!isRecording && !recordedUrl && <StartButton onStart={startRecording} />}
-
-      <div>
-        <VideoPreview videoRef={videoRef} isRecording={isRecording} />
+      <h1 className="text-3xl font-bold mb-5">Ghi hình Camera</h1>
+      <CameraPermissionCard isPrepared={isPrepared} prepareRecording={prepareRecording} ref={videoRef}/>
+      
+      <div className="flex justify-center gap-2 mt-3 items-center">
+        {!isRecording && (
+          <StartButton onStart={startRecording} disabled={!isPrepared}/>
+        )}
+        
         {isRecording && (
           <RecordingControls
             isPaused={isPaused}
@@ -85,8 +90,14 @@ function CameraRecorder() {
             onStop={stopRecording}
           />
         )}
+        
+        <button
+          className="bg-green-100 hover:bg-green-500 px-8 py-4 text-base rounded-full cursor-pointer m-2.5"
+        >
+          Ghi âm thanh
+        </button>
       </div>
-
+     
       {recordedUrl && (
         <RecordedVideo
           recordedUrl={recordedUrl}
@@ -97,7 +108,7 @@ function CameraRecorder() {
       )}
 
       <div className="mt-5">
-        {isLoading && <p className="text-lg text-blue-600">Processing...</p>}
+        {isLoading && <p className="text-lg text-blue-600">Đang xử lý...</p>}
         {translation && (
           <h3 className="text-2xl font-bold text-green-700">{translation}</h3>
         )}
