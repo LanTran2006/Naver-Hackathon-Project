@@ -3,7 +3,6 @@ import VideoPreview from "./VideoPreview";
 import RecordingControls from "./RecordingControls";
 import RecordedVideo from "./RecordedVideo";
 import useMediaRecorder from "../../hooks/useMediaRecorder";
-import useSpeechRecognition from "../../hooks/useSpeechRecognition";
 import { useState } from "react";
 import CameraPermissionCard from "./CameraPermissionCard";
 
