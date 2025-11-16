@@ -56,8 +56,8 @@ function CameraRecorder() {
       console.log("Received data", data);
 
       //3. hien thi ket qua
-      if (data.translation) {
-        setTranslation(`Result: ${data.translation}`);
+      if (data.label) {
+        setTranslation(`Result: ${data.label}`);
       } else if (data.error) {
         setTranslation(`Error from be: ${data.error}`);
       }

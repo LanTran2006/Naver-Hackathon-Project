@@ -50,8 +50,8 @@ function Record() {
       const data = await response.json();
       console.log("Đã nhận kết quả (từ file upload):", data);
 
-      if (data.translation) {
-        setUploadTranslation(`Kết quả (File): ${data.translation}`);
+      if (data.label) {
+        setUploadTranslation(`Kết quả (File): ${data.label}`);
       } else if (data.error) {
         setUploadTranslation(`Lỗi (File): ${data.error}`);
       }
