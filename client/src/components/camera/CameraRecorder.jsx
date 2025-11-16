@@ -3,6 +3,7 @@ import VideoPreview from "./VideoPreview";
 import RecordingControls from "./RecordingControls";
 import RecordedVideo from "./RecordedVideo";
 import useMediaRecorder from "../../hooks/useMediaRecorder";
+import useSpeechRecognition from "../../hooks/useSpeechRecognition";
 import { useState } from "react";
 import CameraPermissionCard from "./CameraPermissionCard";
 
@@ -21,6 +22,8 @@ function CameraRecorder() {
       resetRecording,
       prepareRecording
     } = useMediaRecorder();
+
+  
 
   const [translation, setTranslation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -43,7 +46,7 @@ function CameraRecorder() {
     try {
       //2. gui req => be
       const response = await fetch(
-        "http://localhost:8000/translate-sign-language/",
+         `${import.meta.env.VITE_API_URL}/predict`,
         {
           method: "POST",
           body: formData,
@@ -72,10 +75,16 @@ function CameraRecorder() {
     setTranslation("");
   };
 
+
+
   return (
     <div className="text-center p-3 md:p-5">
       <h1 className="text-2xl md:text-3xl font-bold mb-3 md:mb-5">Ghi hình Camera</h1>
-      <CameraPermissionCard isPrepared={isPrepared} prepareRecording={prepareRecording} ref={videoRef}/>
+      <CameraPermissionCard 
+        isPrepared={isPrepared} 
+        prepareRecording={prepareRecording} 
+        ref={videoRef}
+      />
       
       <div className="flex flex-row flex-wrap justify-center gap-2 mt-3 items-center">
         {!isRecording && (
@@ -92,9 +101,10 @@ function CameraRecorder() {
         )}
         
         <button
-          className="bg-green-100 hover:bg-green-500 px-4 md:px-8 py-3 md:py-4 text-sm md:text-base rounded-full cursor-pointer"
+         
+          className={`px-4 md:px-8 py-3 md:py-4 text-sm md:text-base rounded-full cursor-pointer transition 'bg-green-100 hover:bg-green-500`}
         >
-          Ghi âm thanh
+          🎤 Ghi âm thanh
         </button>
       </div>
      

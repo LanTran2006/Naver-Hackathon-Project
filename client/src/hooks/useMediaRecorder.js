@@ -50,7 +50,7 @@ export default function useMediaRecorder() {
       const blob = new Blob(chunksRef.current, { type: "video/webm" });
       const url = URL.createObjectURL(blob);
       setRecordedUrl(url);
-
+      setVideoBlob(blob)
       if (videoRef.current) {
         videoRef.current.srcObject = null;
       }
