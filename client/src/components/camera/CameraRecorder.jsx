@@ -38,7 +38,7 @@ function CameraRecorder() {
 
     //1. tao formdata
     const formData = new FormData();
-    formData.append("file", videoBlob, "recorded_video,webm");
+    formData.append("file", videoBlob, "recorded_video.webm");
 
     console.log("sending to be");
 
