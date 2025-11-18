@@ -3,11 +3,11 @@ export async function uploadVideoAndGetLabel(file: Blob | File): Promise<string>
   formData.append('file', file); // FastAPI expects parameter name "file".
 
   const baseUrl =
-    import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Allow overriding via env.
-
+    import.meta.env.VITE_API_URL || 'http://localhost:8000'; // Allow overriding via env.
+  console.log(baseUrl)
   let response: Response;
   try {
-    response = await fetch(`${baseUrl}/translate-sign-language/`, {
+    response = await fetch(`${baseUrl}/predict`, {
       method: 'POST',
       body: formData,
     });

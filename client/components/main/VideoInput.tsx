@@ -23,7 +23,7 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
     } = useWebcamRecorder({
         webcamRef,
         countdownSeconds: 2,
-        recordingSeconds: 3,
+        recordingSeconds: 4,
     });
     const [isSending, setIsSending] = useState(false);
     const [progress, setProgress] = useState(0);
