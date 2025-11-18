@@ -50,9 +50,11 @@ export default function useMediaRecorder() {
       const blob = new Blob(chunksRef.current, { type: "video/webm" });
       const url = URL.createObjectURL(blob);
       setRecordedUrl(url);
-      setVideoBlob(blob)
+      setVideoBlob(blob);
       if (videoRef.current) {
         videoRef.current.srcObject = null;
+        videoRef.current.src = url;
+        videoRef.current.controls = true;
       }
     };
     mediaRecorder.start();
@@ -91,7 +93,7 @@ export default function useMediaRecorder() {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       setIsPaused(false);
-      setIsPrepared(false);
+      // Giữ isPrepared = true để video vẫn hiển thị
     }
   };
 
@@ -99,6 +101,10 @@ export default function useMediaRecorder() {
     setRecordedUrl(null);
     setVideoBlob(null);
     chunksRef.current = [];
+    if (videoRef.current) {
+      videoRef.current.src = "";
+      videoRef.current.controls = false;
+    }
     prepareRecording();
   };
 

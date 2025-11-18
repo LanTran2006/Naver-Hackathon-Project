@@ -153,9 +153,6 @@ def read_root():
 
 @app.post("/translate-sign-language/")
 async def translate_video(file: UploadFile = File(...)):
-    """
-    Endpoint nhận video từ React, xử lý và trả về JSON
-    """
     video_path = None
     try:
         # 1. Lưu file video upload (thường là .webm) vào file tạm
@@ -195,7 +192,7 @@ async def translate_video(file: UploadFile = File(...)):
         print(f"Kết quả dự đoán: {final_label}")
 
         # 8. Trả về kết quả cho React
-        return {"translation": final_label}
+        return {"label": final_label}
 
     except Exception as e:
         print(f"LỖI TOÀN CỤC: {e}")
