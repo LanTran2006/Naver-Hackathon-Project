@@ -25,9 +25,19 @@ export default function useMediaRecorder() {
   const prepareRecording = async () => {
     try {
       const str = await navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: "user",
+        },
         audio: true,
       });
+
+      // Log resolution thực tế
+      const videoTrack = str.getVideoTracks()[0];
+      const settings = videoTrack.getSettings();
+      console.log(`Video resolution: ${settings.width}x${settings.height}`);
+
       videoRef.current.srcObject = str;
       setIsPrepared(true);
       setStream(str);
@@ -50,9 +60,11 @@ export default function useMediaRecorder() {
       const blob = new Blob(chunksRef.current, { type: "video/webm" });
       const url = URL.createObjectURL(blob);
       setRecordedUrl(url);
-      setVideoBlob(blob)
+      setVideoBlob(blob);
       if (videoRef.current) {
         videoRef.current.srcObject = null;
+        videoRef.current.src = url;
+        videoRef.current.controls = true;
       }
     };
     mediaRecorder.start();
@@ -91,7 +103,7 @@ export default function useMediaRecorder() {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       setIsPaused(false);
-      setIsPrepared(false);
+      // Giữ isPrepared = true để video vẫn hiển thị
     }
   };
 
@@ -99,6 +111,10 @@ export default function useMediaRecorder() {
     setRecordedUrl(null);
     setVideoBlob(null);
     chunksRef.current = [];
+    if (videoRef.current) {
+      videoRef.current.src = "";
+      videoRef.current.controls = false;
+    }
     prepareRecording();
   };
 
