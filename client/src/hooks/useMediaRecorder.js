@@ -25,9 +25,19 @@ export default function useMediaRecorder() {
   const prepareRecording = async () => {
     try {
       const str = await navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: "user",
+        },
         audio: true,
       });
+
+      // Log resolution thực tế
+      const videoTrack = str.getVideoTracks()[0];
+      const settings = videoTrack.getSettings();
+      console.log(`Video resolution: ${settings.width}x${settings.height}`);
+
       videoRef.current.srcObject = str;
       setIsPrepared(true);
       setStream(str);
