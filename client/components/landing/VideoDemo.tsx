@@ -24,17 +24,17 @@ const VideoDemo: React.FC = () => {
     const [progress, setProgress] = useState(0);
 
     useEffect(() => {
-        return () => cleanup(); // Dọn dẹp stream & timer khi unmount.
+        return () => cleanup(); // Clean up stream & timer on unmount.
     }, [cleanup]);
 
     useEffect(() => {
         let interval: ReturnType<typeof setInterval>;
         if (status === 'recording') {
-            setProgress(0); // Reset tiến trình khi bắt đầu quay.
+            setProgress(0); // Reset progress whenever recording restarts.
             const startTime = Date.now();
             interval = setInterval(() => {
                 const elapsedTime = Date.now() - startTime;
-                const newProgress = Math.min((elapsedTime / (3 * 1000)) * 100, 100); // 3 giây quay.
+                const newProgress = Math.min((elapsedTime / (3 * 1000)) * 100, 100); // 3-second recording window.
                 setProgress(newProgress);
             }, 100);
         } else {
@@ -57,21 +57,21 @@ const VideoDemo: React.FC = () => {
     };
 
     const handleSendToAI = async () => {
-        if (!recordedBlob) return; // Không có video thì không gửi.
-        setIsSending(true); // Đánh dấu đang gửi.
+        if (!recordedBlob) return; // Skip if nothing recorded.
+        setIsSending(true); // Mark sending state.
         setAiResponse('');
         console.log('Sending landing demo video to FastAPI backend');
         try {
-            const label = await uploadVideoAndGetLabel(recordedBlob); // Gọi backend lấy nhãn.
-            setAiResponse(`AI hiểu bạn đang ký hiệu: "${label}".`);
+            const label = await uploadVideoAndGetLabel(recordedBlob); // Request label from backend.
+            setAiResponse(`AI interpreted your sign as: "${label}".`);
         } catch (error: any) {
             const message =
                 typeof error?.message === 'string'
                     ? error.message
-                    : 'Đã xảy ra lỗi khi xử lý video.';
-            setAiResponse(`Xin lỗi, có lỗi khi xử lý video: ${message}`);
+                    : 'An error occurred while processing the video.';
+            setAiResponse(`Sorry, something went wrong while processing the video: ${message}`);
         } finally {
-            setIsSending(false); // Luôn tắt trạng thái gửi.
+            setIsSending(false); // Always clear sending state.
         }
     };
 
@@ -98,18 +98,18 @@ const VideoDemo: React.FC = () => {
                         {!cameraReady ? (
                             <>
                                 <VideoIcon className="w-16 h-16 opacity-80" />
-                                <p className="text-lg font-semibold">Cho phép trình duyệt sử dụng webcam để xem trước.</p>
+                                <p className="text-lg font-semibold">Allow the browser to use your webcam for preview.</p>
                                 {cameraError && <p className="text-sm text-red-200">{cameraError}</p>}
                             </>
                         ) : (
                             <>
                                 <VideoIcon className="w-12 h-12 opacity-80 mx-auto" />
-                                <p className="font-medium">Xem trước webcam tại đây.</p>
+                                <p className="font-medium">Preview your webcam feed here.</p>
                                 <button
                                     onClick={handleStartRecording}
                                     className="bg-primary text-white font-semibold py-2 px-6 rounded-lg hover:bg-primary-hover transition"
                                 >
-                                    Bắt đầu quay
+                                    Start recording
                                 </button>
                             </>
                         )}
@@ -117,7 +117,7 @@ const VideoDemo: React.FC = () => {
                 )}
                 {status === 'countdown' && (
                     <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white">
-                        <p className="text-xl">Chuẩn bị...</p>
+                        <p className="text-xl">Get ready...</p>
                         <p className="text-7xl font-bold">{countdown}</p>
                     </div>
                 )}
@@ -138,7 +138,7 @@ const VideoDemo: React.FC = () => {
                                 ></div>
                             </div>
                             <div className="w-full text-center text-xs text-white bg-black/40 py-1">
-                                Đang quay... {Math.ceil((3 - (progress / 100) * 3))}s
+                                Recording... {Math.ceil((3 - (progress / 100) * 3))}s
                             </div>
                         </div>
                     </>

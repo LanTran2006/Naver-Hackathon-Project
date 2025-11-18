@@ -75,7 +75,7 @@ export const useWebcamRecorder = ({
     } catch (error) {
       console.error('Cannot access webcam stream', error);
       setCameraReady(false);
-      setCameraError('Không thể truy cập webcam. Vui lòng kiểm tra quyền.');
+      setCameraError('Unable to access the webcam. Please verify permissions.');
       setStatus('idle');
       return null;
     }
@@ -88,7 +88,7 @@ export const useWebcamRecorder = ({
 
   const handleCameraError = useCallback((err: string | DOMException) => {
     const message =
-      typeof err === 'string' ? err : err?.message || 'Không thể sử dụng webcam.';
+      typeof err === 'string' ? err : err?.message || 'Unable to use the webcam.';
     setCameraReady(false);
     setCameraError(message);
   }, []);

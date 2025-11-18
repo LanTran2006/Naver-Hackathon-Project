@@ -36,11 +36,11 @@ export const useMediaRecorder = ({
       setCameraError(null);
       if (videoRef.current && mediaType === 'video') {
         videoRef.current.srcObject = mediaStream;
-        // Một số trình duyệt cần gọi play() thủ công để hiển thị preview ngay.
+        // Some browsers require an explicit play() call for immediate preview.
         videoRef.current
           .play()
           .catch(() => {
-            /* bỏ qua lỗi autoplay */
+            /* ignore autoplay rejection */
           });
       }
       return mediaStream;
@@ -48,7 +48,7 @@ export const useMediaRecorder = ({
       console.error('Error accessing media devices.', error);
       setStatus('idle');
       setCameraReady(false);
-      setCameraError('Không thể truy cập camera/micro. Vui lòng kiểm tra quyền.');
+      setCameraError('Unable to access camera/microphone. Please verify permissions.');
       return null;
     }
   }, [mediaType]);

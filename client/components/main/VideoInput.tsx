@@ -57,7 +57,7 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
     }, [recordedBlob]);
 
     useEffect(() => {
-        return () => cleanup(); // Dọn dẹp stream khi unmount.
+        return () => cleanup(); // Clean up stream on unmount.
     }, [cleanup]);
     
     const handleDownload = () => {
@@ -74,12 +74,12 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
     };
 
     const handleSend = async () => {
-        if (!recordedBlob) return; // Nếu chưa có video thì không gửi.
-        setIsSending(true); // Bật trạng thái đang gửi.
+        if (!recordedBlob) return; // Skip when no video is recorded.
+        setIsSending(true); // Mark as sending.
         try {
-            await onSendToAI(recordedBlob); // Gửi blob video lên hàm cha để gọi backend.
+            await onSendToAI(recordedBlob); // Pass blob upward so parent can call backend.
         } finally {
-            setIsSending(false); // Tắt trạng thái đang gửi dù thành công hay lỗi.
+            setIsSending(false); // Always clear sending state.
         }
     };
 
@@ -101,19 +101,19 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                         {!cameraReady ? (
                             <>
                                 <VideoIcon className="w-16 h-16 opacity-80 mx-auto" />
-                                <p className="text-lg font-semibold">Cho phép trình duyệt sử dụng webcam để xem trước.</p>
+                                <p className="text-lg font-semibold">Allow the browser to use your webcam for preview.</p>
                                 {cameraError && <p className="text-sm text-red-200">{cameraError}</p>}
                             </>
                         ) : (
                             <>
                                 <VideoIcon className="w-12 h-12 opacity-80 mx-auto" />
-                                <p className="text-lg font-semibold">Sẵn sàng quay video</p>
+                                <p className="text-lg font-semibold">Ready to record</p>
                                 <button
                                     onClick={handleStartRecording}
                                     disabled={!cameraReady || status !== 'idle'}
                                     className="bg-primary text-white font-semibold py-3 px-8 rounded-lg text-lg flex items-center justify-center gap-2 hover:bg-primary-hover transition disabled:bg-gray-500"
                                 >
-                                    Bắt đầu quay
+                                    Start recording
                                 </button>
                             </>
                         )}
@@ -139,7 +139,7 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                                 ></div>
                             </div>
                             <div className="w-full text-center text-xs text-white bg-black/40 py-1">
-                                Đang quay... {Math.ceil((3 - (progress / 100) * 3))}s
+                                Recording... {Math.ceil((3 - (progress / 100) * 3))}s
                             </div>
                         </div>
                     </>
@@ -159,15 +159,15 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                 <div className="mt-4 space-y-3">
                     <div className="grid grid-cols-2 gap-3">
                         <button onClick={handleRecordAgain} className="w-full bg-secondary text-gray-700 font-medium py-3 rounded-lg hover:bg-secondary-hover transition">
-                            Quay lại video mới
+                            Record another video
                         </button>
                         <button onClick={handleDownload} className="w-full bg-secondary text-gray-700 font-medium py-3 rounded-lg hover:bg-secondary-hover transition">
-                            Tải video về
+                            Download video
                         </button>
                     </div>
                     <button onClick={handleSend} disabled={isSending} className="w-full bg-accent text-white font-semibold py-3 px-6 rounded-lg text-lg flex items-center justify-center gap-2 hover:bg-green-600 transition disabled:bg-gray-400">
                         <SparklesIcon className="w-6 h-6" />
-                        {isSending ? 'Đang gửi...' : 'Gửi video cho AI'}
+                        {isSending ? 'Sending...' : 'Send video to AI'}
                     </button>
                 </div>
             )}

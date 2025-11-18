@@ -16,29 +16,29 @@ const InputColumn: React.FC<InputColumnProps> = ({ onNewAIMessage }) => {
 
     const handleSendVideoToAI = async (blob: Blob) => {
         try {
-            const label = await uploadVideoAndGetLabel(blob); // Gọi backend để lấy nhãn.
-            const aiResponseText = `AI hiểu bạn đang ký hiệu: "${label}".`; // Câu trả lời thân thiện.
-            onNewAIMessage(aiResponseText); // Đẩy vào cột chat.
+            const label = await uploadVideoAndGetLabel(blob); // Request label from backend.
+            const aiResponseText = `AI interpreted your sign as: "${label}".`; // Friendly response.
+            onNewAIMessage(aiResponseText); // Push result to chat column.
         } catch (error: any) {
             const message =
                 typeof error?.message === 'string'
                     ? error.message
-                    : 'Đã xảy ra lỗi khi xử lý video.';
-            onNewAIMessage(`Xin lỗi, có lỗi khi xử lý video: ${message}`);
+                    : 'An error occurred while processing the video.';
+            onNewAIMessage(`Sorry, something went wrong while processing the video: ${message}`);
         }
     };
 
     const handleSendUploadedFileToAI = async (file: File) => {
         try {
-            const label = await uploadVideoAndGetLabel(file); // Gửi file upload lên backend.
-            const aiResponseText = `AI hiểu nội dung file của bạn là: "${label}".`;
+            const label = await uploadVideoAndGetLabel(file); // Send uploaded file to backend.
+            const aiResponseText = `AI interpreted your file as: "${label}".`;
             onNewAIMessage(aiResponseText);
         } catch (error: any) {
             const message =
                 typeof error?.message === 'string'
                     ? error.message
-                    : 'Đã xảy ra lỗi khi xử lý file.';
-            onNewAIMessage(`Xin lỗi, có lỗi khi xử lý file: ${message}`);
+                    : 'An error occurred while processing the file.';
+            onNewAIMessage(`Sorry, something went wrong while processing the file: ${message}`);
         }
     };
     
@@ -71,7 +71,7 @@ const InputColumn: React.FC<InputColumnProps> = ({ onNewAIMessage }) => {
                     {inputMode === 'text' && (
                         <TextInput
                             onSendToAI={async () => {
-                                // Giữ nguyên hành vi text tạm thời: trả về câu mẫu.
+                                // Keep placeholder behaviour for text mode for now.
                                 const aiResponseText =
                                     'Hey, would you be free to grab some dinner tonight?';
                                 onNewAIMessage(aiResponseText);
