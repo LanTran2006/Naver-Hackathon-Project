@@ -16,6 +16,8 @@ export const useMediaRecorder = ({
   const [countdown, setCountdown] = useState(countdownSeconds);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
@@ -30,13 +32,23 @@ export const useMediaRecorder = ({
         audio: true,
       });
       setStream(mediaStream);
+      setCameraReady(true);
+      setCameraError(null);
       if (videoRef.current && mediaType === 'video') {
         videoRef.current.srcObject = mediaStream;
+        // Một số trình duyệt cần gọi play() thủ công để hiển thị preview ngay.
+        videoRef.current
+          .play()
+          .catch(() => {
+            /* bỏ qua lỗi autoplay */
+          });
       }
       return mediaStream;
     } catch (error) {
       console.error('Error accessing media devices.', error);
       setStatus('idle');
+      setCameraReady(false);
+      setCameraError('Không thể truy cập camera/micro. Vui lòng kiểm tra quyền.');
       return null;
     }
   }, [mediaType]);
@@ -47,13 +59,24 @@ export const useMediaRecorder = ({
       setStream(null);
     }
     if (videoRef.current) {
-        videoRef.current.srcObject = null;
+      videoRef.current.srcObject = null;
     }
+    setCameraReady(false);
   }, [stream]);
+
+  const requestCameraAccess = useCallback(async () => {
+    if (stream) {
+      setCameraReady(true);
+      setCameraError(null);
+      return true;
+    }
+    const mediaStream = await startStream();
+    return Boolean(mediaStream);
+  }, [startStream, stream]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-        mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stop();
     }
     clearTimeout(timerRef.current);
     stopStream();
@@ -68,9 +91,8 @@ export const useMediaRecorder = ({
   }, [stopStream]);
 
   const handleStartRecording = async () => {
-    cleanup();
     setRecordedBlob(null);
-    const currentStream = await startStream();
+    const currentStream = stream ?? (await startStream());
     if (!currentStream) return;
 
     setStatus('countdown');
@@ -101,16 +123,17 @@ export const useMediaRecorder = ({
         };
 
         mediaRecorderRef.current.start();
-        
+
         timerRef.current = setTimeout(() => {
           stopRecording();
         }, recordingSeconds * 1000);
       }
     }, 1000);
   };
-  
+
   const handleRecordAgain = () => {
     cleanup();
+    requestCameraAccess();
   };
 
   return {
@@ -118,6 +141,9 @@ export const useMediaRecorder = ({
     countdown,
     recordedBlob,
     videoRef,
+    cameraReady,
+    cameraError,
+    requestCameraAccess,
     handleStartRecording,
     handleRecordAgain,
     stopRecording,

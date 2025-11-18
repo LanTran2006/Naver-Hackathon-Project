@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { UploadCloudIcon, SparklesIcon } from '../common/Icons';
 
 interface FileUploadInputProps {
-    onSendToAI: () => Promise<void>;
+    onSendToAI: (file: File) => Promise<void>;
 }
 
 const FileUploadInput: React.FC<FileUploadInputProps> = ({ onSendToAI }) => {
@@ -12,11 +12,14 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({ onSendToAI }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleSendUploaded = async () => {
-        if (!uploadedFile) return;
-        setIsSending(true);
-        console.log('Sending uploaded file to AI placeholder');
-        await onSendToAI();
-        setIsSending(false);
+        if (!uploadedFile) return; // Không có file thì không gửi.
+        setIsSending(true); // Bật trạng thái đang gửi.
+        console.log('Sending uploaded file to AI backend');
+        try {
+            await onSendToAI(uploadedFile); // Gọi hàm cha với file đã upload.
+        } finally {
+            setIsSending(false); // Luôn tắt trạng thái gửi.
+        }
     };
 
     const handleUploadClick = () => {
@@ -59,10 +62,12 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({ onSendToAI }) => {
                         </div>
                     )}
                     <div className="grid grid-cols-2 gap-3">
-                        <button onClick={handleClearUpload} className="w-full bg-secondary text-gray-700 font-medium py-3 rounded-lg hover:bg-secondary-hover transition">Choose another</button>
+                        <button onClick={handleClearUpload} className="w-full bg-secondary text-gray-700 font-medium py-3 rounded-lg hover:bg-secondary-hover transition">
+                            Chọn file khác
+                        </button>
                         <button onClick={handleSendUploaded} disabled={isSending} className="w-full bg-accent text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-green-600 transition disabled:bg-gray-400">
                              <SparklesIcon className="w-5 h-5" />
-                            {isSending ? 'Understanding...' : 'Understand File'}
+                            {isSending ? 'Đang gửi...' : 'Gửi file cho AI'}
                         </button>
                     </div>
                 </div>
@@ -73,8 +78,8 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({ onSendToAI }) => {
                 >
                     <div className="flex flex-col items-center justify-center text-gray-500">
                         <UploadCloudIcon className="w-16 h-16 mb-4" />
-                        <p className="font-semibold text-lg">Click to upload a file</p>
-                        <p className="text-sm">or drag and drop an audio or video file</p>
+                        <p className="font-semibold text-lg">Nhấn để chọn file</p>
+                        <p className="text-sm">hoặc kéo thả file audio/video vào đây</p>
                     </div>
                 </div>
             )}

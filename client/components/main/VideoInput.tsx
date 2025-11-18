@@ -1,16 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { useMediaRecorder } from '../../hooks/useMediaRecorder';
+import React, { useState, useEffect, useRef } from 'react';
+import Webcam from 'react-webcam';
 import { VideoIcon, SparklesIcon } from '../common/Icons';
+import { useWebcamRecorder } from '../../hooks/useWebcamRecorder';
 
 interface VideoInputProps {
-    onSendToAI: () => Promise<void>;
+    onSendToAI: (blob: Blob) => Promise<void>;
 }
 
 const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
-    const { status, countdown, recordedBlob, videoRef, handleStartRecording, handleRecordAgain, cleanup } = useMediaRecorder({ 
-        mediaType: 'video',
+    const webcamRef = useRef<Webcam>(null);
+    const {
+        status,
+        countdown,
+        recordedBlob,
+        cameraReady,
+        cameraError,
+        handleStartRecording,
+        handleRecordAgain,
+        handleCameraReady,
+        handleCameraError,
+        cleanup
+    } = useWebcamRecorder({
+        webcamRef,
         countdownSeconds: 2,
-        recordingSeconds: 3
+        recordingSeconds: 3,
     });
     const [isSending, setIsSending] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -44,7 +57,7 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
     }, [recordedBlob]);
 
     useEffect(() => {
-        return () => cleanup();
+        return () => cleanup(); // Dọn dẹp stream khi unmount.
     }, [cleanup]);
     
     const handleDownload = () => {
@@ -61,26 +74,49 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
     };
 
     const handleSend = async () => {
-        if (!recordedBlob) return;
-        setIsSending(true);
-        await onSendToAI();
-        setIsSending(false);
+        if (!recordedBlob) return; // Nếu chưa có video thì không gửi.
+        setIsSending(true); // Bật trạng thái đang gửi.
+        try {
+            await onSendToAI(recordedBlob); // Gửi blob video lên hàm cha để gọi backend.
+        } finally {
+            setIsSending(false); // Tắt trạng thái đang gửi dù thành công hay lỗi.
+        }
     };
 
     return (
         <div className="w-full">
-            <div className="aspect-w-16 aspect-h-9 bg-gray-900 rounded-lg overflow-hidden relative border border-gray-200">
-                <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline style={{ display: status === 'preview' ? 'none' : 'block' }} />
-                
+            <div className="relative w-full bg-gray-900 rounded-2xl overflow-hidden min-h-[420px] shadow-inner">
+                <Webcam
+                    ref={webcamRef}
+                    audio
+                    mirrored
+                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ${status === 'preview' ? 'opacity-0' : 'opacity-100'}`}
+                    onUserMedia={handleCameraReady}
+                    onUserMediaError={handleCameraError}
+                    videoConstraints={{ facingMode: 'user' }}
+                />
+
                 {status === 'idle' && (
-                    <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white p-4">
-                        <VideoIcon className="w-16 h-16 opacity-50 mb-4" />
-                        <button
-                            onClick={handleStartRecording}
-                            className="bg-primary text-white font-semibold py-3 px-8 rounded-lg text-lg flex items-center justify-center gap-2 hover:bg-primary-hover transition"
-                        >
-                            Start recording
-                        </button>
+                    <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white p-4 space-y-3 text-center">
+                        {!cameraReady ? (
+                            <>
+                                <VideoIcon className="w-16 h-16 opacity-80 mx-auto" />
+                                <p className="text-lg font-semibold">Cho phép trình duyệt sử dụng webcam để xem trước.</p>
+                                {cameraError && <p className="text-sm text-red-200">{cameraError}</p>}
+                            </>
+                        ) : (
+                            <>
+                                <VideoIcon className="w-12 h-12 opacity-80 mx-auto" />
+                                <p className="text-lg font-semibold">Sẵn sàng quay video</p>
+                                <button
+                                    onClick={handleStartRecording}
+                                    disabled={!cameraReady || status !== 'idle'}
+                                    className="bg-primary text-white font-semibold py-3 px-8 rounded-lg text-lg flex items-center justify-center gap-2 hover:bg-primary-hover transition disabled:bg-gray-500"
+                                >
+                                    Bắt đầu quay
+                                </button>
+                            </>
+                        )}
                     </div>
                 )}
                 {status === 'countdown' && (
@@ -95,25 +131,43 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                             <span className="relative flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span></span>
                             <span>REC</span>
                         </div>
-                        <div className="absolute bottom-0 left-0 w-full h-2 bg-gray-600">
-                            <div className="h-full bg-red-500 transition-all duration-100 ease-linear" style={{ width: `${progress}%` }}></div>
+                        <div className="absolute bottom-0 left-0 w-full">
+                            <div className="h-2 bg-gray-600">
+                                <div
+                                    className="h-full bg-red-500 transition-all duration-100 ease-linear"
+                                    style={{ width: `${progress}%` }}
+                                ></div>
+                            </div>
+                            <div className="w-full text-center text-xs text-white bg-black/40 py-1">
+                                Đang quay... {Math.ceil((3 - (progress / 100) * 3))}s
+                            </div>
                         </div>
                     </>
                 )}
                 {status === 'preview' && videoPreviewSrc && (
-                    <video src={videoPreviewSrc} className="w-full h-full object-cover" controls autoPlay loop />
+                    <video
+                        src={videoPreviewSrc}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        controls
+                        autoPlay
+                        loop
+                    />
                 )}
             </div>
 
             {status === 'preview' && (
                 <div className="mt-4 space-y-3">
                     <div className="grid grid-cols-2 gap-3">
-                        <button onClick={handleRecordAgain} className="w-full bg-secondary text-gray-700 font-medium py-3 rounded-lg hover:bg-secondary-hover transition">Record again</button>
-                        <button onClick={handleDownload} className="w-full bg-secondary text-gray-700 font-medium py-3 rounded-lg hover:bg-secondary-hover transition">Download video</button>
+                        <button onClick={handleRecordAgain} className="w-full bg-secondary text-gray-700 font-medium py-3 rounded-lg hover:bg-secondary-hover transition">
+                            Quay lại video mới
+                        </button>
+                        <button onClick={handleDownload} className="w-full bg-secondary text-gray-700 font-medium py-3 rounded-lg hover:bg-secondary-hover transition">
+                            Tải video về
+                        </button>
                     </div>
                     <button onClick={handleSend} disabled={isSending} className="w-full bg-accent text-white font-semibold py-3 px-6 rounded-lg text-lg flex items-center justify-center gap-2 hover:bg-green-600 transition disabled:bg-gray-400">
                         <SparklesIcon className="w-6 h-6" />
-                        {isSending ? 'Understanding...' : 'Understand this for me'}
+                        {isSending ? 'Đang gửi...' : 'Gửi video cho AI'}
                     </button>
                 </div>
             )}
