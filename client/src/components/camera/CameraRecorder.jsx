@@ -37,22 +37,6 @@ function CameraRecorder() {
 
     setIsLoading(true);
     setTranslation("");
-
-    //1. tao formdata
-    const formData = new FormData();
-    formData.append("file", videoBlob, "recorded_video.webm");
-
-    console.log("sending to be");
-
-    try {
-      //2. gui req => be
-      const response = await fetch(
-         `${import.meta.env.VITE_API_URL}/predict`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
     setTranslatedWords([]);
     setCurrentSegment(0);
     setTotalSegments(0);
@@ -152,12 +136,6 @@ function CameraRecorder() {
             onStop={stopRecording}
           />
         )}
-
-        <button
-          className={`px-4 md:px-8 py-3 md:py-4 text-sm md:text-base rounded-full cursor-pointer transition 'bg-green-100 hover:bg-green-500`}
-        >
-          🎤 Ghi âm thanh
-        </button>
       </div>
 
       {recordedUrl && (
