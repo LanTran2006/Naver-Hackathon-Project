@@ -12,10 +12,12 @@ const MainAppPage: React.FC = () => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [isSummarizing, setIsSummarizing] = useState(false); // Flag đang summarize.
     const [summarizeError, setSummarizeError] = useState<string | null>(null); // Lưu lỗi summarize.
+    const messageIdCounter = React.useRef(0); // Counter để tạo unique ID
 
     const handleNewAIMessage = (text: string) => {
+        messageIdCounter.current += 1;
         const newMessage: ChatMessage = {
-            id: Date.now(),
+            id: `ai-${Date.now()}-${messageIdCounter.current}`,
             sender: 'User (AI)',
             text,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -24,8 +26,9 @@ const MainAppPage: React.FC = () => {
     };
 
     const handleNewFriendMessage = (text: string) => {
+        messageIdCounter.current += 1;
         const newMessage: ChatMessage = {
-            id: Date.now(),
+            id: `friend-${Date.now()}-${messageIdCounter.current}`,
             sender: 'Friend',
             text,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
