@@ -4,6 +4,7 @@ import Webcam from 'react-webcam';
 import { VideoIcon, SparklesIcon } from '../common/Icons';
 import { uploadVideoInChunks } from '../../api';
 import { RecordingStatus } from '../../types';
+import { convertWebMToMP4 } from '../../utils/videoConverter';
 
 const VideoDemo: React.FC = () => {
     const webcamRef = useRef<Webcam>(null);
@@ -19,6 +20,7 @@ const VideoDemo: React.FC = () => {
     const [isSending, setIsSending] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
+    const [isConverting, setIsConverting] = useState(false);
 
     const handleCameraReady = () => {
         setCameraReady(true);
@@ -90,10 +92,22 @@ const VideoDemo: React.FC = () => {
                     }
                 };
                 
-                mediaRecorderRef.current.onstop = () => {
-                    const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
-                    setRecordedBlob(blob);
-                    setStatus('preview');
+                mediaRecorderRef.current.onstop = async () => {
+                    const webmBlob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+                    
+                    try {
+                        setIsConverting(true);
+                        console.log('Converting demo video to MP4...');
+                        const mp4Blob = await convertWebMToMP4(webmBlob);
+                        console.log('Demo conversion complete!');
+                        setRecordedBlob(mp4Blob);
+                    } catch (error) {
+                        console.error('Demo conversion failed, using WebM:', error);
+                        setRecordedBlob(webmBlob);
+                    } finally {
+                        setIsConverting(false);
+                        setStatus('preview');
+                    }
                 };
                 
                 mediaRecorderRef.current.start();
@@ -118,8 +132,8 @@ const VideoDemo: React.FC = () => {
     const handleEndRecording = () => {
         if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
             mediaRecorderRef.current.stop();
+            // Don't cleanup immediately - wait for onstop to complete conversion
         }
-        cleanup();
     };
 
     const handleRecordAgain = () => {
@@ -228,6 +242,13 @@ const VideoDemo: React.FC = () => {
                     <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white">
                         <p className="text-xl">Get ready...</p>
                         <p className="text-7xl font-bold">{countdown}</p>
+                    </div>
+                )}
+                {isConverting && (
+                    <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white z-20">
+                        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mb-4"></div>
+                        <p className="text-xl font-semibold">Converting to MP4...</p>
+                        <p className="text-sm text-gray-300 mt-2">Please wait</p>
                     </div>
                 )}
                 {status === 'recording' && !isPaused && (

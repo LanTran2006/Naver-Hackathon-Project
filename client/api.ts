@@ -1,6 +1,21 @@
+import { convertWebMToMP4 } from './utils/videoConverter';
+
 export async function uploadVideoAndGetLabel(file: Blob | File): Promise<string> {
+  // Convert to MP4 if it's WebM
+  let videoFile = file;
+  if (file.type === 'video/webm' || file.type.includes('webm')) {
+    try {
+      console.log('Converting WebM to MP4...');
+      videoFile = await convertWebMToMP4(file);
+      console.log('Conversion complete');
+    } catch (error) {
+      console.error('Conversion failed, sending original:', error);
+      // If conversion fails, send original
+    }
+  }
+  
   const formData = new FormData(); // Prepare upload payload.
-  formData.append('file', file,'file.webm'); // FastAPI expects parameter name "file".
+  formData.append('file', videoFile, 'file.mp4'); // FastAPI expects parameter name "file".
 
   const baseUrl =import.meta.env.VITE_API_URL; // Allow overriding via env.
   console.log(file)
@@ -142,10 +157,17 @@ async function extractVideoChunk(
         }
       };
       
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'video/webm' });
-        URL.revokeObjectURL(videoUrl);
-        resolve(blob);
+      mediaRecorder.onstop = async () => {
+        const webmBlob = new Blob(chunks, { type: 'video/webm' });
+        try {
+          const mp4Blob = await convertWebMToMP4(webmBlob);
+          URL.revokeObjectURL(videoUrl);
+          resolve(mp4Blob);
+        } catch (error) {
+          console.error('Chunk conversion failed:', error);
+          URL.revokeObjectURL(videoUrl);
+          resolve(webmBlob);
+        }
       };
       
       // Bắt đầu từ startTime

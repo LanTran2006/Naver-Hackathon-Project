@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Webcam from 'react-webcam';
 import { VideoIcon, SparklesIcon } from '../common/Icons';
 import { RecordingStatus } from '../../types';
+import { convertWebMToMP4 } from '../../utils/videoConverter';
 
 interface VideoInputProps {
     onSendToAI: (blob: Blob) => Promise<void>;
@@ -21,9 +22,9 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
     const [recordingTime, setRecordingTime] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
     const [videoPreviewSrc, setVideoPreviewSrc] = useState<string | null>(null);
+    const [isConverting, setIsConverting] = useState(false);
     const [showChunkCountdown, setShowChunkCountdown] = useState(false);
     const [chunkCountdown, setChunkCountdown] = useState(3);
-    const chunkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const handleCameraReady = () => {
         setCameraReady(true);
@@ -57,7 +58,6 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                 
                 // Mỗi 3 giây thì pause và countdown
                 if (seconds > 0 && seconds % 3 === 0) {
-                    // Pause recording
                     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
                         mediaRecorderRef.current.pause();
                         setShowChunkCountdown(true);
@@ -132,10 +132,22 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                     }
                 };
                 
-                mediaRecorderRef.current.onstop = () => {
-                    const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
-                    setRecordedBlob(blob);
-                    setStatus('preview');
+                mediaRecorderRef.current.onstop = async () => {
+                    const webmBlob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+                    
+                    try {
+                        setIsConverting(true);
+                        console.log('Converting video to MP4...');
+                        const mp4Blob = await convertWebMToMP4(webmBlob);
+                        console.log('Conversion complete!');
+                        setRecordedBlob(mp4Blob);
+                    } catch (error) {
+                        console.error('Conversion failed, using WebM:', error);
+                        setRecordedBlob(webmBlob);
+                    } finally {
+                        setIsConverting(false);
+                        setStatus('preview');
+                    }
                 };
                 
                 mediaRecorderRef.current.start();
@@ -144,9 +156,6 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
     };
 
     const handleStopRecording = () => {
-        if (chunkTimerRef.current) {
-            clearTimeout(chunkTimerRef.current);
-        }
         if (mediaRecorderRef.current && (mediaRecorderRef.current.state === 'recording' || mediaRecorderRef.current.state === 'paused')) {
             if (mediaRecorderRef.current.state === 'recording') {
                 mediaRecorderRef.current.pause();
@@ -166,8 +175,8 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
     const handleEndRecording = () => {
         if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
             mediaRecorderRef.current.stop();
+            // Don't cleanup immediately - wait for onstop to complete conversion
         }
-        cleanup();
     };
 
     const handleRecordAgain = () => {
@@ -183,7 +192,7 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
             const url = URL.createObjectURL(recordedBlob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'lreg-recording.webm';
+            a.download = 'lreg-recording.mp4';
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -251,6 +260,13 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                     <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white">
                         <p className="text-xl">Get ready...</p>
                         <p className="text-7xl font-bold">{countdown}</p>
+                    </div>
+                )}
+                {isConverting && (
+                    <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white z-20">
+                        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mb-4"></div>
+                        <p className="text-xl font-semibold">Converting to MP4...</p>
+                        <p className="text-sm text-gray-300 mt-2">Please wait</p>
                     </div>
                 )}
                 {showChunkCountdown && (
