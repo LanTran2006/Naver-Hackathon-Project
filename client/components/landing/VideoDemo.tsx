@@ -18,7 +18,11 @@ const VideoDemo: React.FC = () => {
         handleStartRecording,
         handleRecordAgain,
         cleanup,
-    } = useWebcamRecorder({ webcamRef });
+    } = useWebcamRecorder({ 
+        webcamRef,
+        countdownSeconds: 2,
+        recordingSeconds: 4
+    });
     const [aiResponse, setAiResponse] = useState('');
     const [isSending, setIsSending] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -34,7 +38,7 @@ const VideoDemo: React.FC = () => {
             const startTime = Date.now();
             interval = setInterval(() => {
                 const elapsedTime = Date.now() - startTime;
-                const newProgress = Math.min((elapsedTime / (3 * 1000)) * 100, 100); // 3-second recording window.
+                const newProgress = Math.min((elapsedTime / (5 * 1000)) * 100, 100); // 5-second recording window.
                 setProgress(newProgress);
             }, 100);
         } else {
@@ -138,7 +142,7 @@ const VideoDemo: React.FC = () => {
                                 ></div>
                             </div>
                             <div className="w-full text-center text-xs text-white bg-black/40 py-1">
-                                Recording... {Math.ceil((3 - (progress / 100) * 3))}s
+                                Recording... {Math.ceil((5 - (progress / 100) * 5))}s
                             </div>
                         </div>
                     </>
