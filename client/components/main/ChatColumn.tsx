@@ -1,6 +1,9 @@
-import React, { useRef, useEffect, useState } from 'react'; // Import React hooks.
+import React, { useEffect, useMemo, useRef, useState } from 'react'; // Import React hooks để quản lý UI.
 import { ChatMessage } from '../../types'; // Định nghĩa kiểu message.
 import { SendIcon, MicIcon, FileTextIcon } from '../common/Icons'; // Biểu tượng UI.
+import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis'; // Hook đọc giọng.
+import { useSpeechRecognition } from '../../hooks/useSpeechRecognition'; // Hook nhận dạng giọng nói.
+import SpeechControls from './SpeechControls'; // Component popover bật/tắt đọc tự động.
 
 interface ConversationColumnProps {
     messages: ChatMessage[];
@@ -12,7 +15,25 @@ interface ConversationColumnProps {
 const ConversationColumn: React.FC<ConversationColumnProps> = ({ messages, onSendMessage, onSummarize, isSummarizing }) => {
     const chatEndRef = useRef<HTMLDivElement>(null);
     const [inputText, setInputText] = useState(''); // State input người dùng.
-    const [isRecording, setIsRecording] = useState(false); // Flag voice mock.
+    const [isSpeechEnabled, setIsSpeechEnabled] = useState(false); // Cho biết đang bật đọc tự động hay không.
+    const [lastSpokenId, setLastSpokenId] = useState<ChatMessage['id'] | null>(null); // Lưu ID message AI đã đọc.
+
+    const {
+        isSupported: isSpeechSupported,
+        isSpeaking,
+        speak,
+        stop: stopSpeech
+    } = useSpeechSynthesis({ lang: 'vi-VN' }); // Khởi tạo hook đọc giọng tiếng Việt.
+
+    const {
+        isSupported: isRecognitionSupported,
+        isListening,
+        transcript,
+        error: recognitionError,
+        start: startRecognition,
+        stop: stopRecognition,
+        resetError: resetRecognitionError
+    } = useSpeechRecognition({ lang: 'vi-VN' }); // Khởi tạo hook nhận dạng giọng nói.
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -22,33 +43,98 @@ const ConversationColumn: React.FC<ConversationColumnProps> = ({ messages, onSen
         if (inputText.trim() === '') return; // Không gửi khi rỗng.
         onSendMessage(inputText); // Gửi thẳng qua parent.
         setInputText(''); // Reset input.
+        if (isListening) { // Nếu đang nghe thì dừng để tránh thu âm tiếp.
+            stopRecognition(); // Dừng nhận dạng.
+        } // Hết kiểm tra đang nghe.
     };
 
     const handleVoiceInput = () => {
-        setIsRecording(!isRecording);
-        if (!isRecording) {
-            // Simulate voice-to-text
-            setInputText('Thinking...');
-            setTimeout(() => {
-                setInputText('This is a simulated voice-to-text reply.');
-                setIsRecording(false);
-            }, 2000);
+        if (!isRecognitionSupported) { // Nếu trình duyệt không hỗ trợ.
+            return; // Không làm gì, UI đã báo lỗi.
         }
+        if (isListening) { // Nếu đang nghe thì bấm để dừng.
+            stopRecognition(); // Dừng nhận dạng.
+            return; // Thoát hàm.
+        }
+        resetRecognitionError(); // Xoá lỗi cũ trước khi bắt đầu.
+        startRecognition(); // Bắt đầu thu âm.
     };
+
+    const handleToggleSpeech = () => {
+        if (!isSpeechSupported) { // Không hỗ trợ thì không cho bật.
+            return;
+        }
+        setIsSpeechEnabled((prev) => {
+            const next = !prev; // Đảo trạng thái.
+            if (next) { // Nếu vừa bật.
+                const latestAi = [...messages]
+                    .reverse()
+                    .find((msg) => msg.sender === 'User (AI)'); // Tìm message AI mới nhất.
+                setLastSpokenId(latestAi ? latestAi.id : null); // Đánh dấu đã đọc hết cũ.
+            } else {
+                stopSpeech(); // Khi tắt thì dừng ngay mọi câu đang đọc.
+            }
+            return next; // Cập nhật state.
+        });
+    };
+
+    const latestAiMessage = useMemo(
+        () => [...messages].reverse().find((msg) => msg.sender === 'User (AI)'),
+        [messages]
+    ); // Tìm message AI mới nhất để tái sử dụng.
+
+    useEffect(() => {
+        if (!isSpeechEnabled || !isSpeechSupported) {
+            return; // Không đọc khi chưa bật hoặc không hỗ trợ.
+        }
+        if (!latestAiMessage) {
+            return; // Không có message AI để đọc.
+        }
+        if (lastSpokenId === latestAiMessage.id) {
+            return; // Đã đọc message này rồi.
+        }
+        const cleanText = latestAiMessage.text.replace(/<br\s*\/?>/gi, '\n'); // Chuẩn hoá xuống dòng.
+        speak(cleanText, () => {
+            setLastSpokenId(latestAiMessage.id); // Đánh dấu đã đọc xong.
+        });
+        setLastSpokenId(latestAiMessage.id); // Ngăn đọc lại nếu speak chưa callback.
+    }, [isSpeechEnabled, isSpeechSupported, latestAiMessage, lastSpokenId, speak]);
+
+    useEffect(() => {
+        if (!transcript) {
+            return; // Không cập nhật khi không có kết quả mới.
+        }
+        setInputText(transcript); // Đưa văn bản vừa nhận vào ô input.
+    }, [transcript]);
+
+    useEffect(() => {
+        if (isSpeechEnabled) {
+            return; // Chỉ dừng khi người dùng tắt.
+        }
+        stopSpeech(); // Dừng mọi câu đang đọc khi tắt.
+    }, [isSpeechEnabled, stopSpeech]);
 
     return (
         <div className="bg-white border-l border-gray-200 h-full flex flex-col">
             {/* Header */}
-            <div className="p-4 border-b border-gray-200 flex-shrink-0 flex items-center justify-between">
+            <div className="p-4 border-b border-gray-200 flex-shrink-0 flex items-center justify-between gap-3 flex-wrap">
                  <h3 className="font-semibold text-gray-800 text-lg">Conversation</h3>
-                 <button 
-                    onClick={onSummarize} 
-                    disabled={messages.length < 2 || isSummarizing}
-                    className="flex items-center space-x-2 text-sm font-medium text-primary hover:bg-primary-light px-3 py-1.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-                 >
-                    <FileTextIcon className="w-4 h-4" />
-                    <span>{isSummarizing ? 'Summarizing...' : 'Summarize'}</span>
-                 </button>
+                 <div className="flex items-center gap-2">
+                    <SpeechControls
+                        isEnabled={isSpeechEnabled}
+                        isSupported={isSpeechSupported}
+                        isSpeaking={isSpeaking}
+                        onToggle={handleToggleSpeech}
+                    />
+                    <button 
+                        onClick={onSummarize} 
+                        disabled={messages.length < 2 || isSummarizing}
+                        className="flex items-center space-x-2 text-sm font-medium text-primary hover:bg-primary-light px-3 py-1.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <FileTextIcon className="w-4 h-4" />
+                        <span>{isSummarizing ? 'Summarizing...' : 'Summarize'}</span>
+                    </button>
+                 </div>
             </div>
             
             {/* Chat Area */}
@@ -86,13 +172,30 @@ const ConversationColumn: React.FC<ConversationColumnProps> = ({ messages, onSen
                         placeholder="Reply here..."
                         className="flex-grow px-4 py-3 border border-gray-300 rounded-full bg-gray-100 focus:ring-primary focus:border-primary focus:bg-white"
                     />
-                     <button onClick={handleVoiceInput} className={`p-3 rounded-full hover:bg-gray-100 transition ${isRecording ? 'text-red-500 animate-pulse' : 'text-gray-500 hover:text-primary'}`}>
+                     <button
+                        onClick={handleVoiceInput}
+                        className={`p-3 rounded-full transition ${
+                            isListening ? 'text-red-500 animate-pulse bg-red-50' : 'text-gray-500 hover:text-primary hover:bg-gray-100'
+                        } ${isRecognitionSupported ? '' : 'cursor-not-allowed opacity-60'}`}
+                        disabled={!isRecognitionSupported}
+                     >
                         <MicIcon className="w-6 h-6"/>
                     </button>
                     <button onClick={handleSend} className="bg-primary text-white p-3 rounded-full hover:bg-primary-hover transition shadow disabled:bg-gray-400" disabled={!inputText}>
                         <SendIcon className="w-6 h-6"/>
                     </button>
                 </div>
+                {isListening && (
+                    <p className="mt-2 text-sm text-primary">Đang nghe... hãy nói tiếng Việt tự nhiên.</p>
+                )}
+                {recognitionError && (
+                    <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{recognitionError}</p>
+                )}
+                {!isRecognitionSupported && (
+                    <p className="mt-2 rounded-lg bg-yellow-50 px-3 py-2 text-xs text-yellow-800">
+                        Trình duyệt hiện không hỗ trợ Web Speech API nên không thể nhập bằng giọng nói.
+                    </p>
+                )}
             </div>
         </div>
     );

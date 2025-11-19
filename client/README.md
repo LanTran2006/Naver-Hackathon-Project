@@ -32,3 +32,9 @@ View your app in AI Studio: https://ai.studio/apps/drive/1xrVKmOi8lfV4xrpVs3Mu6B
 - Nút **Understand this for me** (tab Text) gọi Gemini để gợi ý câu trả lời lịch sự, kết quả xuất hiện ở cột Chat.
 - Nút **Summarize** dùng API [ApyHub AI Summarize](https://apyhub.com/utility/ai-summarize) để tổng kết hội thoại và trả văn bản tiếng Việt thuần.
 - Nếu khóa API thiếu hoặc lỗi mạng, giao diện hiển thị thông báo thân thiện thay vì treo.
+
+## Web Speech Voice UX
+- Popover **Giọng đọc AI** (ở đầu cột Conversation) dùng Web Speech API để đọc to các phản hồi mới của AI (bên trái). Chỉ các tin mới sau khi bật mới được đọc.
+- Nút mic ở khung nhập Friend nay dùng SpeechRecognition: khi bật, bạn nói tiếng Việt và hệ thống tự điền text. Nhấn lại để dừng.
+- Tính năng chỉ hoạt động trên trình duyệt hỗ trợ Web Speech (Chrome/Edge desktop, Chrome Android). Safari & iOS hiện chưa hỗ trợ nên UI sẽ khóa nút.
+- Khi gặp lỗi quyền micro (not-allowed), cần cấp lại quyền trong phần cài đặt trình duyệt rồi thử lại.

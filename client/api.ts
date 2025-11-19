@@ -1,29 +1,32 @@
 import { convertWebMToMP4 } from './utils/videoConverter';
 
 export async function uploadVideoAndGetLabel(file: Blob | File): Promise<string> {
-  // Convert to MP4 if it's WebM
-  let videoFile = file;
-  if (file.type === 'video/webm' || file.type.includes('webm')) {
-    try {
-      console.log('Converting WebM to MP4...');
-      videoFile = await convertWebMToMP4(file);
-      console.log('Conversion complete');
-    } catch (error) {
-      console.error('Conversion failed, sending original:', error);
-      // If conversion fails, send original
-    }
+  const formData = new FormData();
+  
+  // Determine filename based on file type
+  let filename = 'recorded-video.webm'; // Default for Blob
+  if (file instanceof File) {
+    filename = file.name; // Use original filename for File uploads
   }
   
-  const formData = new FormData(); // Prepare upload payload.
-  formData.append('file', videoFile, 'file.mp4'); // FastAPI expects parameter name "file".
+  // Ensure the blob has the correct MIME type
+  let videoFile = file;
+  if (file instanceof Blob && !file.type.includes('video')) {
+    // If blob doesn't have proper type, create new one with video/webm
+    videoFile = new Blob([file], { type: 'video/webm' });
+  }
+  
+  formData.append('file', videoFile, filename);
 
-  const baseUrl =import.meta.env.VITE_API_URL; // Allow overriding via env.
-  console.log(file)
+  const baseUrl = import.meta.env.VITE_API_URL; // Fix spacing
+  
+  
   let response: Response;
   try {
     response = await fetch(`${baseUrl}/predict`, {
       method: 'POST',
       body: formData,
+      // Note: Don't set Content-Type header manually - browser will set it with boundary
     });
   } catch (error) {
     console.error('Unable to reach backend:', error);
@@ -31,10 +34,19 @@ export async function uploadVideoAndGetLabel(file: Blob | File): Promise<string>
       'Cannot reach the sign-translation server. Please ensure the FastAPI backend is running (e.g., `uvicorn app.main:app --host 0.0.0.0 --port 8000`) and the network is not blocked.'
     );
   }
-
+  console.log(response)
   if (!response.ok) {
+    // Try to get more detailed error message from server
+    let errorDetail = response.statusText;
+    try {
+      const errorData = await response.json();
+      errorDetail = errorData.detail || errorData.message || JSON.stringify(errorData);
+    } catch {
+      // If can't parse JSON, use statusText
+    }
+    
     throw new Error(
-      `Server responded with status ${response.status}. Please restart the backend and try again (details: ${response.statusText}).`
+      `Server responded with status ${response.status}: ${errorDetail}`
     );
   }
 
