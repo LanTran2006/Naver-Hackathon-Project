@@ -1,14 +1,23 @@
 export async function uploadVideoAndGetLabel(file: Blob | File): Promise<string> {
-  const formData = new FormData(); // Prepare upload payload.
-  formData.append('file', file,'file.webm'); // FastAPI expects parameter name "file".
+  const formData = new FormData();
+  
+  // Determine filename based on file type
+  let filename = 'video.webm'; // Default for Blob
+  if (file instanceof File) {
+    filename = file.name; // Use original filename for File uploads
+  }
+  
+  formData.append('file', file, filename);
 
-  const baseUrl =import.meta.env.VITE_API_URL; // Allow overriding via env.
-  console.log(file)
+  const baseUrl = import.meta.env.VITE_API_URL; // Fix spacing
+  console.log('Uploading file:', filename, 'Size:', file.size, 'Type:', file.type);
+  
   let response: Response;
   try {
     response = await fetch(`${baseUrl}/predict`, {
       method: 'POST',
       body: formData,
+      // Note: Don't set Content-Type header manually - browser will set it with boundary
     });
   } catch (error) {
     console.error('Unable to reach backend:', error);
@@ -18,8 +27,17 @@ export async function uploadVideoAndGetLabel(file: Blob | File): Promise<string>
   }
 
   if (!response.ok) {
+    // Try to get more detailed error message from server
+    let errorDetail = response.statusText;
+    try {
+      const errorData = await response.json();
+      errorDetail = errorData.detail || errorData.message || JSON.stringify(errorData);
+    } catch {
+      // If can't parse JSON, use statusText
+    }
+    
     throw new Error(
-      `Server responded with status ${response.status}. Please restart the backend and try again (details: ${response.statusText}).`
+      `Server responded with status ${response.status}: ${errorDetail}`
     );
   }
 
