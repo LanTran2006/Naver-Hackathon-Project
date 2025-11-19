@@ -2,50 +2,133 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Webcam from 'react-webcam';
 import { VideoIcon, SparklesIcon } from '../common/Icons';
-import { uploadVideoAndGetLabel } from '../../api';
-import { useWebcamRecorder } from '../../hooks/useWebcamRecorder';
+import { uploadVideoInChunks } from '../../api';
+import { RecordingStatus } from '../../types';
 
 const VideoDemo: React.FC = () => {
     const webcamRef = useRef<Webcam>(null);
-    const {
-        status,
-        countdown,
-        recordedBlob,
-        cameraReady,
-        cameraError,
-        handleCameraReady,
-        handleCameraError,
-        handleStartRecording,
-        handleRecordAgain,
-        cleanup,
-    } = useWebcamRecorder({ 
-        webcamRef,
-        countdownSeconds: 2,
-        recordingSeconds: 4
-    });
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const recordedChunksRef = useRef<Blob[]>([]);
+    const streamRef = useRef<MediaStream | null>(null);
+    const [status, setStatus] = useState<RecordingStatus>('idle');
+    const [countdown, setCountdown] = useState(2);
+    const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+    const [cameraReady, setCameraReady] = useState(false);
+    const [cameraError, setCameraError] = useState<string | null>(null);
     const [aiResponse, setAiResponse] = useState('');
     const [isSending, setIsSending] = useState(false);
-    const [progress, setProgress] = useState(0);
+    const [recordingTime, setRecordingTime] = useState(0);
+    const [isPaused, setIsPaused] = useState(false);
+
+    const handleCameraReady = () => {
+        setCameraReady(true);
+        setCameraError(null);
+    };
+
+    const handleCameraError = (err: string | DOMException) => {
+        const message = typeof err === 'string' ? err : err?.message || 'Unable to use the webcam.';
+        setCameraReady(false);
+        setCameraError(message);
+    };
+
+    const cleanup = () => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+            mediaRecorderRef.current.stop();
+        }
+    };
 
     useEffect(() => {
-        return () => cleanup(); // Clean up stream & timer on unmount.
-    }, [cleanup]);
+        return () => cleanup();
+    }, []);
 
     useEffect(() => {
         let interval: ReturnType<typeof setInterval>;
         if (status === 'recording') {
-            setProgress(0); // Reset progress whenever recording restarts.
             const startTime = Date.now();
             interval = setInterval(() => {
                 const elapsedTime = Date.now() - startTime;
-                const newProgress = Math.min((elapsedTime / (5 * 1000)) * 100, 100); // 5-second recording window.
-                setProgress(newProgress);
-            }, 100);
+                setRecordingTime(Math.floor(elapsedTime / 1000));
+            }, 1000);
         } else {
-            setProgress(0);
+            setRecordingTime(0);
         }
         return () => clearInterval(interval);
     }, [status]);
+    const handleStartRecording = async () => {
+        setRecordedBlob(null);
+        setAiResponse('');
+        setIsPaused(false);
+        recordedChunksRef.current = [];
+        
+        const stream = webcamRef.current?.stream || await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        if (!stream) return;
+        
+        streamRef.current = stream;
+        
+        setStatus('countdown');
+        setCountdown(2);
+        let count = 2;
+        const countdownInterval = setInterval(() => {
+            count--;
+            setCountdown(count);
+            if (count === 0) {
+                clearInterval(countdownInterval);
+                setStatus('recording');
+                
+                mediaRecorderRef.current = new MediaRecorder(stream, { 
+                    mimeType: 'video/webm;codecs=vp8',
+                    videoBitsPerSecond: 1000000
+                });
+                
+                mediaRecorderRef.current.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunksRef.current.push(event.data);
+                    }
+                };
+                
+                mediaRecorderRef.current.onstop = () => {
+                    const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+                    setRecordedBlob(blob);
+                    setStatus('preview');
+                };
+                
+                mediaRecorderRef.current.start();
+            }
+        }, 1000);
+    };
+
+    const handleStopRecording = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+            mediaRecorderRef.current.pause();
+            setIsPaused(true);
+        }
+    };
+
+    const handleContinueRecording = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'paused') {
+            mediaRecorderRef.current.resume();
+            setIsPaused(false);
+        }
+    };
+
+    const handleEndRecording = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+            mediaRecorderRef.current.stop();
+        }
+        cleanup();
+    };
+
+    const handleRecordAgain = () => {
+        setRecordedBlob(null);
+        setAiResponse('');
+        setStatus('idle');
+        setIsPaused(false);
+        recordedChunksRef.current = [];
+    };
     
     const handleDownload = () => {
         if (recordedBlob) {
@@ -61,21 +144,33 @@ const VideoDemo: React.FC = () => {
     };
 
     const handleSendToAI = async () => {
-        if (!recordedBlob) return; // Skip if nothing recorded.
-        setIsSending(true); // Mark sending state.
-        setAiResponse('');
+        if (!recordedBlob) return;
+        setIsSending(true);
+        setAiResponse('🎬 Đang xử lý video...');
         console.log('Sending landing demo video to FastAPI backend');
         try {
-            const label = await uploadVideoAndGetLabel(recordedBlob); // Request label from backend.
-            setAiResponse(`AI interpreted your sign as: "${label}".`);
+            const collectedWords: string[] = [];
+            
+            await uploadVideoInChunks(recordedBlob, (current, total, label) => {
+                collectedWords.push(label);
+                setAiResponse(
+                    `📊 Đang xử lý đoạn ${current}/${total}: "${label}"\n\n` +
+                    `Kết quả hiện tại: ${collectedWords.join(' ')}`
+                );
+            });
+            
+            setAiResponse(
+                `✅ AI đã nhận diện xong!\n\n` +
+                `Kết quả: "${collectedWords.join(' ')}"`
+            );
         } catch (error: any) {
             const message =
                 typeof error?.message === 'string'
                     ? error.message
                     : 'An error occurred while processing the video.';
-            setAiResponse(`Sorry, something went wrong while processing the video: ${message}`);
+            setAiResponse(`❌ Sorry, something went wrong: ${message}`);
         } finally {
-            setIsSending(false); // Always clear sending state.
+            setIsSending(false);
         }
     };
 
@@ -91,10 +186,20 @@ const VideoDemo: React.FC = () => {
                     ref={webcamRef}
                     audio
                     mirrored
+                    disablePictureInPicture={false}
+                    forceScreenshotSourceSize={false}
+                    imageSmoothing={true}
+                    screenshotFormat="image/jpeg"
+                    screenshotQuality={0.92}
                     className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ${status === 'preview' ? 'opacity-0' : 'opacity-100'}`}
                     onUserMedia={handleCameraReady}
                     onUserMediaError={handleCameraError}
-                    videoConstraints={{ facingMode: 'user' }}
+                    videoConstraints={{ 
+                        facingMode: 'user',
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        frameRate: { ideal: 30 }
+                    }}
                 />
 
                 {status === 'idle' && (
@@ -125,27 +230,43 @@ const VideoDemo: React.FC = () => {
                         <p className="text-7xl font-bold">{countdown}</p>
                     </div>
                 )}
-                {status === 'recording' && (
+                {status === 'recording' && !isPaused && (
                     <>
                         <div className="absolute top-4 right-4 flex items-center space-x-2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
                             <span className="relative flex h-3 w-3">
                               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                               <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
                             </span>
-                            <span>REC</span>
+                            <span>REC {recordingTime}s</span>
                         </div>
-                        <div className="absolute bottom-0 left-0 w-full">
-                            <div className="h-2 bg-gray-600">
-                                <div
-                                    className="h-full bg-red-500 transition-all duration-100 ease-linear"
-                                    style={{ width: `${progress}%` }}
-                                ></div>
-                            </div>
-                            <div className="w-full text-center text-xs text-white bg-black/40 py-1">
-                                Recording... {Math.ceil((5 - (progress / 100) * 5))}s
-                            </div>
+                        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                            <button
+                                onClick={handleStopRecording}
+                                className="bg-yellow-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-yellow-600 transition"
+                            >
+                                Stop Recording
+                            </button>
                         </div>
                     </>
+                )}
+                {status === 'recording' && isPaused && (
+                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white space-y-4">
+                        <p className="text-xl font-semibold">Recording Paused</p>
+                        <div className="flex space-x-4">
+                            <button
+                                onClick={handleContinueRecording}
+                                className="bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-600 transition"
+                            >
+                                Continue
+                            </button>
+                            <button
+                                onClick={handleEndRecording}
+                                className="bg-red-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-red-600 transition"
+                            >
+                                End Video
+                            </button>
+                        </div>
+                    </div>
                 )}
                 {status === 'preview' && recordedBlob && (
                     <video
@@ -166,7 +287,7 @@ const VideoDemo: React.FC = () => {
                         className="w-full bg-primary text-white font-semibold py-3 px-6 rounded-lg text-lg flex items-center justify-center gap-2 hover:bg-primary-hover transition disabled:bg-gray-400"
                     >
                         <VideoIcon className="w-6 h-6" />
-                        Quick demo – Record 3 seconds
+                        Start Recording
                     </button>
                 ) : (
                     <div className="space-y-4">
