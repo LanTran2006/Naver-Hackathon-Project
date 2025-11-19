@@ -4,7 +4,7 @@ import VideoInput from './VideoInput';
 import FileUploadInput from './AudioInput';
 import TextInput from './TextInput';
 import { VideoIcon, UploadCloudIcon, TypeIcon } from '../common/Icons';
-import { uploadVideoAndGetLabel } from '../../api';
+import { uploadVideoAndGetLabel, uploadVideoInChunks } from '../../api';
 
 interface InputColumnProps {
     onNewAIMessage: (text: string) => void;
@@ -16,9 +16,25 @@ const InputColumn: React.FC<InputColumnProps> = ({ onNewAIMessage }) => {
 
     const handleSendVideoToAI = async (blob: Blob) => {
         try {
-            const label = await uploadVideoAndGetLabel(blob); // Request label from backend.
-            const aiResponseText = `AI interpreted your sign as: "${label}".`; // Friendly response.
-            onNewAIMessage(aiResponseText); // Push result to chat column.
+            // Hiển thị thông báo bắt đầu
+            onNewAIMessage(' Đang xử lý video...');
+            
+            const collectedWords: string[] = [];
+            
+            // Gửi từng đoạn 3s và nhận kết quả
+            await uploadVideoInChunks(blob, (current, total, label) => {
+                collectedWords.push(label);
+                // Cập nhật real-time
+                const progressText = ` Đang xử lý đoạn ${current}/${total}: "${label}"\n\n` +
+                                   `Kết quả hiện tại: ${collectedWords.join(' ')}`;
+                onNewAIMessage(progressText);
+            });
+            
+            // Hiển thị kết quả cuối cùng
+            const finalText = ` AI đã nhận diện xong!\n\n` +
+                            `Kết quả: "${collectedWords.join(' ')}"`;
+            onNewAIMessage(finalText);
+            
         } catch (error: any) {
             const message =
                 typeof error?.message === 'string'
