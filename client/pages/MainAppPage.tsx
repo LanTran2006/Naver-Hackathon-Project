@@ -1,15 +1,17 @@
-import React, { useContext, useState } from 'react';
-import { AppContext } from '../App';
-import { Page, ChatMessage } from '../types';
-import InputColumn from '../components/main/InputColumn';
-import ConversationColumn from '../components/main/ChatColumn';
-import { LogoIcon } from '../components/common/Icons';
+import React, { useContext, useState } from 'react'; // Import React & context.
+import { AppContext } from '../App'; // App context.
+import { Page, ChatMessage } from '../types'; // Kiểu page/message.
+import InputColumn from '../components/main/InputColumn'; // Cột input.
+import ConversationColumn from '../components/main/ChatColumn'; // Cột chat.
+import { LogoIcon } from '../components/common/Icons'; // Logo.
+import { summarizeConversation } from '../services/gemini'; // Helper tóm tắt Gemini.
 
 const MainAppPage: React.FC = () => {
     const app = useContext(AppContext);
     const { navigateTo } = app!;
     const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [isSummarizing, setIsSummarizing] = useState(false);
+    const [isSummarizing, setIsSummarizing] = useState(false); // Flag đang summarize.
+    const [summarizeError, setSummarizeError] = useState<string | null>(null); // Lưu lỗi summarize.
 
     const handleNewAIMessage = (text: string) => {
         const newMessage: ChatMessage = {
@@ -32,23 +34,28 @@ const MainAppPage: React.FC = () => {
     };
 
     const handleSummarize = async () => {
-        if (messages.length < 2) return;
-        setIsSummarizing(true);
-        const conversationText = messages.map(msg => `${msg.sender}: ${msg.text}`).join('\n');
-        console.log("Summarizing conversation:\n", conversationText);
-
-        // Placeholder for Gemini API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        const summary = "This is a placeholder summary of the conversation. It appears you were discussing dinner plans and decided to meet at 7 PM.";
-
-        const summaryMessage: ChatMessage = {
-            id: `summary-${Date.now()}`,
-            sender: 'User (AI)',
-            text: `**Summary of the conversation:**\n${summary}`,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-        setMessages(prev => [...prev, summaryMessage]);
-        setIsSummarizing(false);
+        if (messages.length < 2 || isSummarizing) return; // Không chạy nếu thiếu dữ liệu hoặc đang chạy.
+        setSummarizeError(null); // Reset lỗi cũ.
+        setIsSummarizing(true); // Bật loading.
+        const conversationText = messages
+            .map(msg => `${msg.sender}: ${msg.text.replace(/<br\s*\/?>/gi, '\n')}`)
+            .join('\n'); // Chuẩn bị chuỗi hội thoại sạch.
+        try {
+        const summary = await summarizeConversation(conversationText); // Gọi Gemini.
+            const summaryMessage: ChatMessage = {
+                id: `summary-${Date.now()}`,
+            sender: 'Summarize Conversation',
+            text: summary,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }; // Tạo message summarize thuần văn bản.
+            setMessages(prev => [...prev, summaryMessage]); // Thêm vào danh sách.
+        } catch (error) {
+            const message =
+                (error as Error)?.message || 'Không thể tóm tắt hội thoại lúc này.'; // Lấy lỗi thân thiện.
+            setSummarizeError(message); // Hiển thị lỗi.
+        } finally {
+            setIsSummarizing(false); // Tắt loading.
+        }
     };
 
     return (
@@ -69,6 +76,11 @@ const MainAppPage: React.FC = () => {
                     <InputColumn onNewAIMessage={handleNewAIMessage} />
                 </div>
                 <div className="w-full md:w-1/2 lg:w-2/5 h-full flex flex-col">
+                    {summarizeError && (
+                        <div className="m-3 rounded-xl bg-red-50 border border-red-200 px-4 py-2 text-sm text-red-700">
+                            {summarizeError}
+                        </div>
+                    )}
                     <ConversationColumn 
                         messages={messages} 
                         onSendMessage={handleNewFriendMessage} 

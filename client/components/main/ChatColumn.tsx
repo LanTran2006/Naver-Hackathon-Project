@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { ChatMessage } from '../../types';
-import { SendIcon, MicIcon, FileTextIcon } from '../common/Icons';
+import React, { useRef, useEffect, useState } from 'react'; // Import React hooks.
+import { ChatMessage } from '../../types'; // Định nghĩa kiểu message.
+import { SendIcon, MicIcon, FileTextIcon } from '../common/Icons'; // Biểu tượng UI.
 
 interface ConversationColumnProps {
     messages: ChatMessage[];
@@ -11,17 +11,17 @@ interface ConversationColumnProps {
 
 const ConversationColumn: React.FC<ConversationColumnProps> = ({ messages, onSendMessage, onSummarize, isSummarizing }) => {
     const chatEndRef = useRef<HTMLDivElement>(null);
-    const [inputText, setInputText] = useState('');
-    const [isRecording, setIsRecording] = useState(false);
+    const [inputText, setInputText] = useState(''); // State input người dùng.
+    const [isRecording, setIsRecording] = useState(false); // Flag voice mock.
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
     
     const handleSend = () => {
-        if(inputText.trim() === '') return;
-        onSendMessage(inputText);
-        setInputText('');
+        if (inputText.trim() === '') return; // Không gửi khi rỗng.
+        onSendMessage(inputText); // Gửi thẳng qua parent.
+        setInputText(''); // Reset input.
     };
 
     const handleVoiceInput = () => {

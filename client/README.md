@@ -15,6 +15,17 @@ View your app in AI Studio: https://ai.studio/apps/drive/1xrVKmOi8lfV4xrpVs3Mu6B
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+2. Tạo file `.env` (hoặc `.env.local`) và đặt biến:
+   ```
+   # Ưu tiên tên có prefix VITE_
+   VITE_GEMINI_API_KEY=your_api_key_here
+   # Nếu đang dùng tên cũ, VITE_GEMINI_API_KEY vẫn được tự động nhận
+   ```
 3. Run the app:
    `npm run dev`
+
+## Gemini Features
+
+- Nút **Understand this for me** (tab Text) gọi Gemini để gợi ý câu trả lời lịch sự, kết quả xuất hiện ở cột Chat.
+- Nút **Summarize** sẽ gửi toàn bộ hội thoại lên Gemini để nhận lại đoạn Markdown tổng kết.
+- Nếu khóa API thiếu hoặc lỗi mạng, giao diện hiển thị thông báo thân thiện thay vì treo.

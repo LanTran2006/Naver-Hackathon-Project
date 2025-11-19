@@ -70,11 +70,8 @@ const InputColumn: React.FC<InputColumnProps> = ({ onNewAIMessage }) => {
                     {inputMode === 'upload' && <FileUploadInput onSendToAI={handleSendUploadedFileToAI} />}
                     {inputMode === 'text' && (
                         <TextInput
-                            onSendToAI={async () => {
-                                // Keep placeholder behaviour for text mode for now.
-                                const aiResponseText =
-                                    'Hey, would you be free to grab some dinner tonight?';
-                                onNewAIMessage(aiResponseText);
+                            onSendToAI={async (suggestion) => {
+                                onNewAIMessage(`Gợi ý câu trả lời:\n${suggestion}`);
                             }}
                         />
                     )}

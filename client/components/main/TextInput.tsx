@@ -1,32 +1,48 @@
 
 import React, { useState } from 'react';
 import { SparklesIcon } from '../common/Icons';
+import { normalizeUserPrompt } from '../../services/gemini';
 
 interface TextInputProps {
-    onSendToAI: () => Promise<void>;
+    onSendToAI: (suggestion: string) => Promise<void> | void;
 }
 
 const TextInput: React.FC<TextInputProps> = ({ onSendToAI }) => {
     const [text, setText] = useState('');
     const [isSending, setIsSending] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleSend = async () => {
-        if(text.trim() === '') return;
+        if (text.trim() === '') return;
         setIsSending(true);
-        console.log(`Sending text: ${text}`);
-        await onSendToAI();
-        setIsSending(false);
+        setError(null);
+        try {
+            const normalized = await normalizeUserPrompt(text);
+            await onSendToAI(normalized);
+            setText('');
+        } catch (err) {
+            const message =
+                (err as Error)?.message || 'Không thể hiểu câu này, thử lại nhé.';
+            setError(message);
+        } finally {
+            setIsSending(false);
+        }
     };
 
     return (
         <div className="w-full flex flex-col">
-            <textarea 
+            <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 rows={6}
                 placeholder="Describe what you want to say..."
                 className="w-full p-4 border border-gray-300 rounded-lg text-lg focus:ring-primary focus:border-primary"
             />
+            {error && (
+                <p className="mt-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                    {error}
+                </p>
+            )}
             <button
                 onClick={handleSend}
                 disabled={isSending || text.trim() === ''}
