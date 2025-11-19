@@ -1,6 +1,8 @@
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models'; // Định nghĩa URL gốc cho Gemini REST.
 const DEFAULT_MODEL = 'gemini-2.5-flash'; // Mặc định dùng model 2.5 flash mới nhất cho tốc độ cao.
 const REQUEST_TIMEOUT_MS = 20000; // Timeout chuẩn để tránh treo UI.
+const APYHUB_SUMMARIZE_URL = 'https://api.apyhub.com/ai/summarize-text'; // Endpoint ApyHub cho summarize hội thoại.
+const DEFAULT_SUMMARY_LENGTH = 'medium'; // Độ dài tóm tắt mặc định ApyHub.
 
 /**
  * Gọi Gemini REST với kiểm soát timeout và schema JSON tùy chọn.
@@ -117,42 +119,65 @@ export async function normalizeUserPrompt(rawText: string): Promise<string> {
  * Tóm tắt toàn bộ hội thoại, trả markdown thân thiện.
  */
 export async function summarizeConversation(conversation: string): Promise<string> {
-    const prompt = [
-        'Bạn là chuyên gia tổng kết cuộc hội thoại giữa Người dùng và AI.', // Đặt vai trò.
-        'Tạo JSON {"summary": "..."}:', // Chỉ rõ cấu trúc trả về.
-        '- summary là đoạn văn thuần văn bản, tối đa 3 câu, không dùng Markdown, không ký tự *, _, # hoặc đầu dòng bullet.', // Ràng buộc định dạng.
-        '- Giữ giọng điệu trung lập, tiếng Việt tự nhiên.', // Yêu cầu phong cách.
-        `Hội thoại đầy đủ:\n"""${conversation.trim()}"""` // Chèn ngữ cảnh hội thoại.
-    ].join('\n'); // Prompt hướng dẫn rõ ràng, cấm ký tự định dạng.
+    const apiKey =
+        import.meta.env.VITE_APYHUB_API_KEY ||
+        import.meta.env.APYHUB_API_KEY ||
+        (typeof __APP_APYHUB_API_KEY__ !== 'undefined' ? __APP_APYHUB_API_KEY__ : ''); // Đọc API key từ env/hằng build.
+    if (!apiKey) {
+        throw new Error('Thiếu cấu hình APYHUB_API_KEY/VITE_APYHUB_API_KEY.'); // Bắt lỗi thiếu key ApyHub.
+    }
 
-    const response = await callGemini(DEFAULT_MODEL, prompt, {
-        type: 'object',
-        properties: {
-            summary: {
-                type: 'string',
-                description: 'Đoạn Markdown mô tả nội dung chính và bước tiếp theo.'
-            }
-        },
-        required: ['summary']
-    }); // Gửi schema JSON summary.
+    const normalizedConversation = conversation.trim(); // Chuẩn hoá hội thoại trước khi gửi.
+    if (!normalizedConversation) {
+        throw new Error('Không có nội dung hội thoại để tóm tắt.'); // Không gửi khi không có dữ liệu.
+    }
 
-    let parsed: { summary?: string }; // Biến parse.
+    const controller = new AbortController(); // Chuẩn bị abort cho timeout.
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS); // Tận dụng timeout chung.
+
     try {
-        parsed = JSON.parse(response); // Parse JSON.
-    } catch (error) {
-        throw new Error('Gemini trả về dữ liệu tóm tắt không phải JSON hợp lệ.'); // Báo lỗi parse.
-    }
+        const response = await fetch(APYHUB_SUMMARIZE_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apy-token': apiKey
+            },
+            body: JSON.stringify({
+                text: normalizedConversation,
+                summary_length: DEFAULT_SUMMARY_LENGTH,
+                output_language: 'vi'
+            }),
+            signal: controller.signal
+        }); // Gọi API ApyHub với text tiếng Việt.
 
-    const summary = parsed.summary?.trim(); // Lấy summary gốc.
-    if (!summary) {
-        throw new Error('Gemini không trả summary hợp lệ.'); // Kiểm tra rỗng.
+        if (!response.ok) {
+            const errorText = await response.text(); // Lấy chi tiết lỗi để hiển thị.
+            throw new Error(
+                `ApyHub trả lỗi ${response.status}: ${errorText || response.statusText}`
+            );
+        }
+
+        const data = await response.json(); // Parse JSON trả về.
+        const summary =
+            data?.data?.summary ??
+            data?.summary ??
+            data?.result ??
+            ''; // ApyHub có thể bọc summary ở nhiều cấp khác nhau.
+
+        if (!summary) {
+            throw new Error('ApyHub không trả summary hợp lệ.'); // Đảm bảo có nội dung.
+        }
+
+        return String(summary)
+            .replace(/\n{3,}/g, '\n\n')
+            .trim(); // Trả về văn bản thuần đã chuẩn hoá.
+    } catch (error) {
+        if ((error as Error).name === 'AbortError') {
+            throw new Error('Yêu cầu ApyHub quá thời gian cho phép.'); // Xử lý timeout cụ thể.
+        }
+        throw error; // Đẩy lỗi khác lên UI xử lý.
+    } finally {
+        clearTimeout(timeout); // Dọn timeout.
     }
-    const sanitizedSummary = summary
-        .replace(/\*\*/g, '') // Bỏ toàn bộ ** đậm.
-        .replace(/^\s*[\*\-]\s*/gm, '') // Xoá bullet bắt đầu bằng * hoặc -.
-        .replace(/[_#]/g, '') // Loại ký tự Markdown còn lại như _ hoặc #.
-        .replace(/\n{3,}/g, '\n\n') // Chuẩn hoá xuống dòng liên tiếp.
-        .trim(); // Cắt khoảng trắng dư.
-    return sanitizedSummary; // Trả văn bản sạch.
 }
 

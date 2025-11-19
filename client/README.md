@@ -20,12 +20,15 @@ View your app in AI Studio: https://ai.studio/apps/drive/1xrVKmOi8lfV4xrpVs3Mu6B
    # Ưu tiên tên có prefix VITE_
    VITE_GEMINI_API_KEY=your_api_key_here
    # Nếu đang dùng tên cũ, VITE_GEMINI_API_KEY vẫn được tự động nhận
+
+   # ApyHub dùng riêng cho Summarize
+   VITE_APYHUB_API_KEY=your_apyhub_key
+   # Có thể dùng tên APYHUB_API_KEY nhưng khuyến nghị giữ prefix VITE_
    ```
 3. Run the app:
    `npm run dev`
 
-## Gemini Features
-
+## AI Features
 - Nút **Understand this for me** (tab Text) gọi Gemini để gợi ý câu trả lời lịch sự, kết quả xuất hiện ở cột Chat.
-- Nút **Summarize** sẽ gửi toàn bộ hội thoại lên Gemini để nhận lại đoạn Markdown tổng kết.
+- Nút **Summarize** dùng API [ApyHub AI Summarize](https://apyhub.com/utility/ai-summarize) để tổng kết hội thoại và trả văn bản tiếng Việt thuần.
 - Nếu khóa API thiếu hoặc lỗi mạng, giao diện hiển thị thông báo thân thiện thay vì treo.

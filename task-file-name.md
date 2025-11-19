@@ -93,6 +93,20 @@ Executing: "Hoàn tất điều chỉnh Understand & schema"
   * Reason: Yêu cầu người dùng: Chat bên phải gửi thường, Understand mới paraphrase.
   * Blockers: None
   * Status: completed
+* 2025-11-19 07:40
+  * Step: 8
+  * Changes: Tách Summarize sang API ApyHub, thêm biến `VITE_APYHUB_API_KEY` trong Vite config/env, cập nhật README và service `summarizeConversation`.
+  * Summary: Hội thoại vẫn dùng Gemini cho Understand nhưng Summarize gọi ApyHub, đồng thời có xử lý lỗi và timeout giống trước.
+  * Reason: Người dùng yêu cầu ngưng dùng Gemini cho Summarize và chuyển qua API mới.
+  * Blockers: None
+  * Status: completed
+* 2025-11-19 07:50
+  * Step: 9
+  * Changes: Điều chỉnh `MainAppPage.tsx` để Summarize chỉ gửi hội thoại giữa Friend và User (AI), bỏ các message khác và thêm cảnh báo khi dữ liệu thiếu.
+  * Summary: ApyHub giờ nhận đúng toàn bộ cuộc trò chuyện hai chiều thay vì lẫn các bản tóm tắt cũ, giúp output phản ánh cả Friend.
+  * Reason: Người dùng báo summary chỉ phản ánh tin AI; cần đảm bảo text Friend được gửi đi.
+  * Blockers: None
+  * Status: completed
 
 # Final Review
 (chưa hoàn tất)

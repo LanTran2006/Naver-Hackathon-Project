@@ -34,12 +34,26 @@ const MainAppPage: React.FC = () => {
     };
 
     const handleSummarize = async () => {
-        if (messages.length < 2 || isSummarizing) return; // Không chạy nếu thiếu dữ liệu hoặc đang chạy.
+        if (isSummarizing) return; // Không chạy nếu đang chạy.
         setSummarizeError(null); // Reset lỗi cũ.
         setIsSummarizing(true); // Bật loading.
-        const conversationText = messages
-            .map(msg => `${msg.sender}: ${msg.text.replace(/<br\s*\/?>/gi, '\n')}`)
-            .join('\n'); // Chuẩn bị chuỗi hội thoại sạch.
+        const summarizableMessages = messages.filter(
+            (msg) => msg.sender === 'Friend' || msg.sender === 'User (AI)'
+        ); // Chỉ lấy hội thoại giữa Friend và AI.
+
+        if (summarizableMessages.length < 2) {
+            setIsSummarizing(false);
+            setSummarizeError('Cần ít nhất một lượt trao đổi giữa Friend và AI để tóm tắt.'); // Báo lỗi rõ ràng.
+            return;
+        }
+
+        const conversationText = summarizableMessages
+            .map((msg) => {
+                const role = msg.sender === 'Friend' ? 'Friend' : 'AI';
+                const cleanText = msg.text.replace(/<br\s*\/?>/gi, '\n');
+                return `${role}: ${cleanText}`;
+            })
+            .join('\n'); // Chuẩn bị chuỗi hội thoại sạch chỉ gồm Friend & AI.
         try {
         const summary = await summarizeConversation(conversationText); // Gọi Gemini.
             const summaryMessage: ChatMessage = {
