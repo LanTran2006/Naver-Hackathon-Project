@@ -4,7 +4,7 @@ export async function uploadVideoAndGetLabel(file: Blob | File): Promise<string>
 
   const baseUrl =
     import.meta.env.VITE_API_URL || 'http://localhost:8000'; // Allow overriding via env.
-  console.log(baseUrl)
+  console.log(file)
   let response: Response;
   try {
     response = await fetch(`${baseUrl}/predict`, {
