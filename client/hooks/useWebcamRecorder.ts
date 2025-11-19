@@ -46,17 +46,7 @@ export const useWebcamRecorder = ({
     }
   }, []);
 
-  const selectMimeType = () => {
-    if (typeof MediaRecorder === 'undefined') {
-      return undefined;
-    }
-    const candidates = [
-      'video/webm;codecs=vp9,opus',
-      'video/webm;codecs=vp8,opus',
-      'video/webm',
-    ];
-    return candidates.find((type) => MediaRecorder.isTypeSupported(type));
-  };
+ 
 
   const getActiveStream = useCallback(async () => {
     const webcamStream = webcamRef.current?.stream ?? null;
@@ -116,7 +106,7 @@ export const useWebcamRecorder = ({
         clearCountdown();
         setStatus('recording');
 
-        const mimeType = selectMimeType();
+        const mimeType = 'video/webm';
         const options = mimeType ? { mimeType } : undefined;
         mediaRecorderRef.current = new MediaRecorder(stream, options);
         recordedChunksRef.current = [];
@@ -128,7 +118,7 @@ export const useWebcamRecorder = ({
         };
 
         mediaRecorderRef.current.onstop = () => {
-          const blobType = mimeType ?? 'video/webm';
+          const blobType = 'video/webm';
           const blob = new Blob(recordedChunksRef.current, { type: blobType });
           setRecordedBlob(blob);
           setStatus('preview');
