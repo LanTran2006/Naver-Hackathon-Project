@@ -2,15 +2,22 @@ export async function uploadVideoAndGetLabel(file: Blob | File): Promise<string>
   const formData = new FormData();
   
   // Determine filename based on file type
-  let filename = 'video.webm'; // Default for Blob
+  let filename = 'recorded-video.webm'; // Default for Blob
   if (file instanceof File) {
     filename = file.name; // Use original filename for File uploads
   }
   
-  formData.append('file', file, filename);
+  // Ensure the blob has the correct MIME type
+  let videoFile = file;
+  if (file instanceof Blob && !file.type.includes('video')) {
+    // If blob doesn't have proper type, create new one with video/webm
+    videoFile = new Blob([file], { type: 'video/webm' });
+  }
+  
+  formData.append('file', videoFile, filename);
 
   const baseUrl = import.meta.env.VITE_API_URL; // Fix spacing
-  console.log('Uploading file:', filename, 'Size:', file.size, 'Type:', file.type);
+  
   
   let response: Response;
   try {
@@ -25,7 +32,7 @@ export async function uploadVideoAndGetLabel(file: Blob | File): Promise<string>
       'Cannot reach the sign-translation server. Please ensure the FastAPI backend is running (e.g., `uvicorn app.main:app --host 0.0.0.0 --port 8000`) and the network is not blocked.'
     );
   }
-
+  console.log(response)
   if (!response.ok) {
     // Try to get more detailed error message from server
     let errorDetail = response.statusText;

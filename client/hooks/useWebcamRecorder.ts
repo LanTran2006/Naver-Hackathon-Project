@@ -18,7 +18,6 @@ export const useWebcamRecorder = ({
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
-
   const recordedChunksRef = useRef<Blob[]>([]);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const countdownIntervalRef = useRef<number | undefined>(undefined);
@@ -55,7 +54,11 @@ export const useWebcamRecorder = ({
     }
     try {
       const fallbackStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: "user",
+        },
         audio: true,
       });
       fallbackStreamRef.current = fallbackStream;
@@ -105,10 +108,8 @@ export const useWebcamRecorder = ({
       if (current === 0) {
         clearCountdown();
         setStatus('recording');
-
-        const mimeType = 'video/webm';
-        const options = mimeType ? { mimeType } : undefined;
-        mediaRecorderRef.current = new MediaRecorder(stream, options);
+        
+        mediaRecorderRef.current = new MediaRecorder(stream, {mimeType: 'video/webm'});
         recordedChunksRef.current = [];
 
         mediaRecorderRef.current.ondataavailable = (event) => {
@@ -118,14 +119,13 @@ export const useWebcamRecorder = ({
         };
 
         mediaRecorderRef.current.onstop = () => {
-          const blobType = 'video/webm';
-          const blob = new Blob(recordedChunksRef.current, { type: blobType });
+          const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });      
           setRecordedBlob(blob);
           setStatus('preview');
           stopFallbackStream();
         };
 
-        mediaRecorderRef.current.start();
+        mediaRecorderRef.current.start(100);
         clearRecordingTimeout();
         recordingTimeoutRef.current = window.setTimeout(() => {
           handleStopRecording();
