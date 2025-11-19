@@ -1,10 +1,9 @@
 export async function uploadVideoAndGetLabel(file: Blob | File): Promise<string> {
   const formData = new FormData(); // Prepare upload payload.
-  formData.append('file', file); // FastAPI expects parameter name "file".
+  formData.append('file', file,'file.webm'); // FastAPI expects parameter name "file".
 
-  const baseUrl =
-    import.meta.env.VITE_API_URL || 'http://localhost:8000'; // Allow overriding via env.
-  console.log(baseUrl)
+  const baseUrl =import.meta.env.VITE_API_URL; // Allow overriding via env.
+  console.log(file)
   let response: Response;
   try {
     response = await fetch(`${baseUrl}/predict`, {
