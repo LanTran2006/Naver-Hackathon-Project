@@ -21,7 +21,7 @@ const Hero: React.FC = () => {
                                 AI-Powered Communication
                             </span>
                         </div>
-                        <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 leading-tight mb-6 tracking-tight">
+                        <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-gray-900 leading-tight mb-6 tracking-tight">
                             Translate gestures <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
                                 into words.

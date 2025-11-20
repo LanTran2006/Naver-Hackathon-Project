@@ -22,11 +22,11 @@ const Header: React.FC = () => {
     }, []);
 
     return (
-        <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-5'}`}>
-            <div className="container mx-auto px-6 flex justify-between items-center">
+        <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-4 sm:py-5'}`}>
+            <div className="container mx-auto px-4 sm:px-6 flex justify-between items-center">
                 <div className="flex items-center space-x-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                    <LogoIcon className="h-8 w-8 text-blue-600" />
-                    <span className="text-2xl font-bold text-gray-900">LReg</span>
+                    <LogoIcon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+                    <span className="text-xl sm:text-2xl font-bold text-gray-900">LReg</span>
                 </div>
                 <nav className="hidden md:flex items-center space-x-8">
                     <a href="#features" className="text-gray-600 hover:text-blue-600 font-medium transition">Features</a>
@@ -36,7 +36,7 @@ const Header: React.FC = () => {
                 </nav>
                 <button
                     onClick={() => app?.navigateTo(Page.MainApp)}
-                    className={`font-semibold px-6 py-2.5 rounded-full transition shadow-sm ${scrolled ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-blue-600 hover:bg-gray-50'}`}
+                    className={`font-semibold px-4 py-2 sm:px-6 sm:py-2.5 text-sm sm:text-base rounded-full transition shadow-sm ${scrolled ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-blue-600 hover:bg-gray-50'}`}
                 >
                     Launch App
                 </button>

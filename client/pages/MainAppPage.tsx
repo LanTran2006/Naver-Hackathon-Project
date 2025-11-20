@@ -3,7 +3,7 @@ import { AppContext } from '../App';
 import { Page, ChatMessage } from '../types';
 import InputColumn from '../components/main/InputColumn';
 import ConversationColumn from '../components/main/ChatColumn';
-import { LogoIcon } from '../components/common/Icons';
+import { LogoIcon, VideoIcon, MessageSquareIcon } from '../components/common/Icons';
 import { summarizeConversation } from '../services/gemini';
 
 const MainAppPage: React.FC = () => {
@@ -14,6 +14,9 @@ const MainAppPage: React.FC = () => {
     const [summarizeError, setSummarizeError] = useState<string | null>(null);
     const messageIdCounter = React.useRef(0);
 
+    // Mobile responsive state
+    const [mobileTab, setMobileTab] = useState<'input' | 'chat'>('input');
+
     const handleNewAIMessage = (text: string) => {
         messageIdCounter.current += 1;
         const newMessage: ChatMessage = {
@@ -23,6 +26,12 @@ const MainAppPage: React.FC = () => {
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         setMessages(prev => [...prev, newMessage]);
+        // Auto-switch to chat on mobile when new message arrives
+        if (window.innerWidth < 768) {
+            // Optional: setMobileTab('chat'); 
+            // User requested: "only open when selected", so maybe don't auto-switch?
+            // But a notification dot would be nice.
+        }
     };
 
     const handleNewFriendMessage = (text: string) => {
@@ -109,10 +118,13 @@ const MainAppPage: React.FC = () => {
                     <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-100/50 blur-3xl"></div>
                 </div>
 
-                <div className="w-full md:w-1/2 lg:w-3/5 h-full overflow-y-auto p-4 sm:p-6 lg:p-8 scroll-smooth">
+                {/* Input Column - Hidden on mobile if chat tab is active */}
+                <div className={`w-full md:w-1/2 lg:w-3/5 h-full overflow-y-auto p-4 sm:p-6 lg:p-8 scroll-smooth ${mobileTab === 'chat' ? 'hidden md:block' : 'block'}`}>
                     <InputColumn onNewAIMessage={handleNewAIMessage} />
                 </div>
-                <div className="w-full md:w-1/2 lg:w-2/5 h-full flex flex-col border-l border-gray-200/50 bg-white/50 backdrop-blur-sm">
+
+                {/* Chat Column - Hidden on mobile if input tab is active */}
+                <div className={`w-full md:w-1/2 lg:w-2/5 h-full flex flex-col border-l border-gray-200/50 bg-white/50 backdrop-blur-sm ${mobileTab === 'input' ? 'hidden md:flex' : 'flex'}`}>
                     {summarizeError && (
                         <div className="m-4 rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600 flex items-center gap-2 shadow-sm">
                             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -127,6 +139,29 @@ const MainAppPage: React.FC = () => {
                     />
                 </div>
             </main>
+
+            {/* Mobile Bottom Navigation */}
+            <div className="md:hidden bg-white border-t border-gray-200 px-6 py-3 flex justify-around items-center z-30 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                <button
+                    onClick={() => setMobileTab('input')}
+                    className={`flex flex-col items-center gap-1 transition-colors ${mobileTab === 'input' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                    <VideoIcon className="w-6 h-6" />
+                    <span className="text-xs font-medium">Input</span>
+                </button>
+                <button
+                    onClick={() => setMobileTab('chat')}
+                    className={`flex flex-col items-center gap-1 transition-colors ${mobileTab === 'chat' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                    <div className="relative">
+                        <MessageSquareIcon className="w-6 h-6" />
+                        {messages.length > 0 && (
+                            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
+                        )}
+                    </div>
+                    <span className="text-xs font-medium">Chat</span>
+                </button>
+            </div>
         </div>
     );
 };
