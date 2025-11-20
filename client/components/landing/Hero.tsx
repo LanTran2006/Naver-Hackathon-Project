@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { AppContext } from '../../App';
 import { Page } from '../../types';
+import GradientText from '../ui/GradientText';
 
 const Hero: React.FC = () => {
     const app = useContext(AppContext);
@@ -21,11 +22,19 @@ const Hero: React.FC = () => {
                                 AI-Powered Communication
                             </span>
                         </div>
-                        <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-gray-900 leading-tight mb-6 tracking-tight">
-                            Translate gestures <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                                into words.
-                            </span>
+                        <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-gray-900 leading-tight mb-6 tracking-tight flex flex-col items-start">
+                            <span className="block -ml-2 sm:-ml-4">Translate</span>
+                            <span className="block ml-8 sm:ml-16 text-gray-800">gestures</span>
+                            <div className="ml-16 sm:ml-32 mt-2">
+                                <GradientText
+                                    colors={["#000000", "#a3a3a3", "#000000", "#a3a3a3", "#000000"]}
+                                    animationSpeed={5}
+                                    showBorder={false}
+                                    className="text-5xl lg:text-7xl font-bold mx-0"
+                                >
+                                    into words.
+                                </GradientText>
+                            </div>
                         </h1>
                         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
                             Record your video, and let our AI interpret your gestures and expressions into clear, natural language instantly.
