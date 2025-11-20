@@ -28,7 +28,7 @@ export interface Friend {
 // FIX: Add ChatMessage interface to fix import error in ChatColumn
 export interface ChatMessage {
   id: number | string;
-  sender: 'User (AI)' | 'Friend';
+  sender: 'User (AI)' | 'Friend' | 'Summarize Conversation';
   text: string;
   timestamp: string;
 }

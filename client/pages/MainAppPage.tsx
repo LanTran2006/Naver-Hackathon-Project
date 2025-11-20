@@ -1,18 +1,18 @@
-import React, { useContext, useState } from 'react'; // Import React & context.
-import { AppContext } from '../App'; // App context.
-import { Page, ChatMessage } from '../types'; // Kiểu page/message.
-import InputColumn from '../components/main/InputColumn'; // Cột input.
-import ConversationColumn from '../components/main/ChatColumn'; // Cột chat.
-import { LogoIcon } from '../components/common/Icons'; // Logo.
-import { summarizeConversation } from '../services/gemini'; // Helper tóm tắt Gemini.
+import React, { useContext, useState } from 'react';
+import { AppContext } from '../App';
+import { Page, ChatMessage } from '../types';
+import InputColumn from '../components/main/InputColumn';
+import ConversationColumn from '../components/main/ChatColumn';
+import { LogoIcon } from '../components/common/Icons';
+import { summarizeConversation } from '../services/gemini';
 
 const MainAppPage: React.FC = () => {
     const app = useContext(AppContext);
     const { navigateTo } = app!;
     const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [isSummarizing, setIsSummarizing] = useState(false); // Flag đang summarize.
-    const [summarizeError, setSummarizeError] = useState<string | null>(null); // Lưu lỗi summarize.
-    const messageIdCounter = React.useRef(0); // Counter để tạo unique ID
+    const [isSummarizing, setIsSummarizing] = useState(false);
+    const [summarizeError, setSummarizeError] = useState<string | null>(null);
+    const messageIdCounter = React.useRef(0);
 
     const handleNewAIMessage = (text: string) => {
         messageIdCounter.current += 1;
@@ -37,16 +37,16 @@ const MainAppPage: React.FC = () => {
     };
 
     const handleSummarize = async () => {
-        if (isSummarizing) return; // Không chạy nếu đang chạy.
-        setSummarizeError(null); // Reset lỗi cũ.
-        setIsSummarizing(true); // Bật loading.
+        if (isSummarizing) return;
+        setSummarizeError(null);
+        setIsSummarizing(true);
         const summarizableMessages = messages.filter(
             (msg) => msg.sender === 'Friend' || msg.sender === 'User (AI)'
-        ); // Chỉ lấy hội thoại giữa Friend và AI.
+        );
 
         if (summarizableMessages.length < 2) {
             setIsSummarizing(false);
-            setSummarizeError('Cần ít nhất một lượt trao đổi giữa Friend và AI để tóm tắt.'); // Báo lỗi rõ ràng.
+            setSummarizeError('Cần ít nhất một lượt trao đổi giữa Friend và AI để tóm tắt.');
             return;
         }
 
@@ -56,51 +56,72 @@ const MainAppPage: React.FC = () => {
                 const cleanText = msg.text.replace(/<br\s*\/?>/gi, '\n');
                 return `${role}: ${cleanText}`;
             })
-            .join('\n'); // Chuẩn bị chuỗi hội thoại sạch chỉ gồm Friend & AI.
+            .join('\n');
         try {
-        const summary = await summarizeConversation(conversationText); // Gọi Gemini.
+            const summary = await summarizeConversation(conversationText);
             const summaryMessage: ChatMessage = {
                 id: `summary-${Date.now()}`,
-            sender: 'Summarize Conversation',
-            text: summary,
+                sender: 'Summarize Conversation',
+                text: summary,
                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }; // Tạo message summarize thuần văn bản.
-            setMessages(prev => [...prev, summaryMessage]); // Thêm vào danh sách.
+            };
+            setMessages(prev => [...prev, summaryMessage]);
         } catch (error) {
             const message =
-                (error as Error)?.message || 'Không thể tóm tắt hội thoại lúc này.'; // Lấy lỗi thân thiện.
-            setSummarizeError(message); // Hiển thị lỗi.
+                (error as Error)?.message || 'Không thể tóm tắt hội thoại lúc này.';
+            setSummarizeError(message);
         } finally {
-            setIsSummarizing(false); // Tắt loading.
+            setIsSummarizing(false);
         }
     };
 
     return (
-        <div className="h-screen w-screen bg-gray-50 flex flex-col">
-            <header className="bg-white border-b border-gray-200 px-4 h-16 flex-shrink-0 flex items-center justify-between z-10">
-                <div className="flex items-center space-x-2">
-                    <LogoIcon className="h-8 w-8 text-primary" />
-                    <span className="text-xl font-bold text-gray-800 hidden sm:inline">LReg</span>
+        <div className="h-screen w-screen bg-gray-50 flex flex-col font-sans">
+            {/* Header */}
+            <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 px-6 h-18 flex-shrink-0 flex items-center justify-between z-20 sticky top-0">
+                <div className="flex items-center gap-3">
+                    <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-2 rounded-xl text-white shadow-lg shadow-blue-200">
+                        <LogoIcon className="h-6 w-6" />
+                    </div>
+                    <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700 hidden sm:inline">
+                        LReg
+                    </span>
                 </div>
-                <div className="text-lg font-semibold text-gray-700 hidden md:block">AI Communication Assistant</div>
-                <button onClick={() => navigateTo(Page.Landing)} className="text-sm font-medium text-gray-600 hover:text-primary px-4 py-2 rounded-lg hover:bg-gray-100 transition">
-                    Back to Home
+
+                <div className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-gray-100 rounded-full border border-gray-200">
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span className="text-sm font-medium text-gray-600">AI Communication Assistant</span>
+                </div>
+
+                <button
+                    onClick={() => navigateTo(Page.Landing)}
+                    className="group flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-blue-600 px-4 py-2 rounded-xl hover:bg-blue-50 transition-all duration-200"
+                >
+                    <span>Back to Home</span>
+                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                 </button>
             </header>
 
-            <main className="flex-grow flex-1 flex flex-col md:flex-row overflow-hidden">
-                <div className="w-full md:w-1/2 lg:w-3/5 h-full overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <main className="flex-grow flex-1 flex flex-col md:flex-row overflow-hidden relative">
+                {/* Background decoration */}
+                <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50">
+                    <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full bg-blue-100/50 blur-3xl"></div>
+                    <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-100/50 blur-3xl"></div>
+                </div>
+
+                <div className="w-full md:w-1/2 lg:w-3/5 h-full overflow-y-auto p-4 sm:p-6 lg:p-8 scroll-smooth">
                     <InputColumn onNewAIMessage={handleNewAIMessage} />
                 </div>
-                <div className="w-full md:w-1/2 lg:w-2/5 h-full flex flex-col">
+                <div className="w-full md:w-1/2 lg:w-2/5 h-full flex flex-col border-l border-gray-200/50 bg-white/50 backdrop-blur-sm">
                     {summarizeError && (
-                        <div className="m-3 rounded-xl bg-red-50 border border-red-200 px-4 py-2 text-sm text-red-700">
+                        <div className="m-4 rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600 flex items-center gap-2 shadow-sm">
+                            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             {summarizeError}
                         </div>
                     )}
-                    <ConversationColumn 
-                        messages={messages} 
-                        onSendMessage={handleNewFriendMessage} 
+                    <ConversationColumn
+                        messages={messages}
+                        onSendMessage={handleNewFriendMessage}
                         onSummarize={handleSummarize}
                         isSummarizing={isSummarizing}
                     />
