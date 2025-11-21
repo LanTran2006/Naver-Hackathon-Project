@@ -320,17 +320,17 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
             </div>
 
             {status === 'preview' && (
-                <div className="mt-4 space-y-3">
+                <div className="mt-4 space-y-3 max-w-md mx-auto">
                     <div className="grid grid-cols-2 gap-3">
-                        <button onClick={handleRecordAgain} className="w-full bg-secondary text-gray-700 font-medium py-3 rounded-lg hover:bg-secondary-hover transition">
+                        <button onClick={handleRecordAgain} className="w-full bg-secondary text-gray-700 font-medium py-2 rounded-lg hover:bg-secondary-hover transition text-sm">
                             Record another video
                         </button>
-                        <button onClick={handleDownload} className="w-full bg-secondary text-gray-700 font-medium py-3 rounded-lg hover:bg-secondary-hover transition">
+                        <button onClick={handleDownload} className="w-full bg-secondary text-gray-700 font-medium py-2 rounded-lg hover:bg-secondary-hover transition text-sm">
                             Download video
                         </button>
                     </div>
-                    <button onClick={handleSend} disabled={isSending} className="w-full bg-accent text-white font-semibold py-3 px-6 rounded-lg text-lg flex items-center justify-center gap-2 hover:bg-green-600 transition disabled:bg-gray-400">
-                        <SparklesIcon className="w-6 h-6" />
+                    <button onClick={handleSend} disabled={isSending} className="w-full bg-accent text-white font-semibold py-2.5 px-6 rounded-lg text-base flex items-center justify-center gap-2 hover:bg-green-600 transition disabled:bg-gray-400">
+                        <SparklesIcon className="w-5 h-5" />
                         {isSending ? 'Sending...' : 'Send video to AI'}
                     </button>
                 </div>
