@@ -19,7 +19,6 @@ const VideoDemo: React.FC = () => {
     const [aiResponse, setAiResponse] = useState('');
     const [isSending, setIsSending] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
-    const [isPaused, setIsPaused] = useState(false);
     const [isConverting, setIsConverting] = useState(false);
 
     const handleCameraReady = () => {
@@ -63,7 +62,6 @@ const VideoDemo: React.FC = () => {
     const handleStartRecording = async () => {
         setRecordedBlob(null);
         setAiResponse('');
-        setIsPaused(false);
         recordedChunksRef.current = [];
         
         const stream = webcamRef.current?.stream || await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -116,20 +114,6 @@ const VideoDemo: React.FC = () => {
     };
 
     const handleStopRecording = () => {
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-            mediaRecorderRef.current.pause();
-            setIsPaused(true);
-        }
-    };
-
-    const handleContinueRecording = () => {
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'paused') {
-            mediaRecorderRef.current.resume();
-            setIsPaused(false);
-        }
-    };
-
-    const handleEndRecording = () => {
         if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
             mediaRecorderRef.current.stop();
             // Don't cleanup immediately - wait for onstop to complete conversion
@@ -140,7 +124,6 @@ const VideoDemo: React.FC = () => {
         setRecordedBlob(null);
         setAiResponse('');
         setStatus('idle');
-        setIsPaused(false);
         recordedChunksRef.current = [];
     };
     
@@ -149,7 +132,7 @@ const VideoDemo: React.FC = () => {
             const url = URL.createObjectURL(recordedBlob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'lreg-demo.webm';
+            a.download = 'lreg-demo.mp4';
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -251,7 +234,7 @@ const VideoDemo: React.FC = () => {
                         <p className="text-sm text-gray-300 mt-2">Please wait</p>
                     </div>
                 )}
-                {status === 'recording' && !isPaused && (
+                {status === 'recording' && (
                     <>
                         <div className="absolute top-4 right-4 flex items-center space-x-2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
                             <span className="relative flex h-3 w-3">
@@ -263,31 +246,12 @@ const VideoDemo: React.FC = () => {
                         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
                             <button
                                 onClick={handleStopRecording}
-                                className="bg-yellow-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-yellow-600 transition"
+                                className="bg-red-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-600 transition"
                             >
                                 Stop Recording
                             </button>
                         </div>
                     </>
-                )}
-                {status === 'recording' && isPaused && (
-                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white space-y-4">
-                        <p className="text-xl font-semibold">Recording Paused</p>
-                        <div className="flex space-x-4">
-                            <button
-                                onClick={handleContinueRecording}
-                                className="bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-600 transition"
-                            >
-                                Continue
-                            </button>
-                            <button
-                                onClick={handleEndRecording}
-                                className="bg-red-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-red-600 transition"
-                            >
-                                End Video
-                            </button>
-                        </div>
-                    </div>
                 )}
                 {status === 'preview' && recordedBlob && (
                     <video

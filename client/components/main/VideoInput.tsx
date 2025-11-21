@@ -20,7 +20,6 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
     const [cameraError, setCameraError] = useState<string | null>(null);
     const [isSending, setIsSending] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
-    const [isPaused, setIsPaused] = useState(false);
     const [videoPreviewSrc, setVideoPreviewSrc] = useState<string | null>(null);
     const [isConverting, setIsConverting] = useState(false);
     const [showChunkCountdown, setShowChunkCountdown] = useState(false);
@@ -49,7 +48,7 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
 
     useEffect(() => {
         let interval: ReturnType<typeof setInterval>;
-        if (status === 'recording' && !isPaused && !showChunkCountdown) {
+        if (status === 'recording' && !showChunkCountdown) {
             const startTime = Date.now() - (recordingTime * 1000);
             interval = setInterval(() => {
                 const elapsedTime = Date.now() - startTime;
@@ -84,7 +83,7 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
             setRecordingTime(0);
         }
         return () => clearInterval(interval);
-    }, [status, isPaused, showChunkCountdown, recordingTime]);
+    }, [status, showChunkCountdown, recordingTime]);
 
     useEffect(() => {
         if (recordedBlob) {
@@ -103,7 +102,6 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
 
     const handleStartRecording = async () => {
         setRecordedBlob(null);
-        setIsPaused(false);
         recordedChunksRef.current = [];
 
         const stream = webcamRef.current?.stream || await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
@@ -156,25 +154,9 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
     };
 
     const handleStopRecording = () => {
-        if (mediaRecorderRef.current && (mediaRecorderRef.current.state === 'recording' || mediaRecorderRef.current.state === 'paused')) {
-            if (mediaRecorderRef.current.state === 'recording') {
-                mediaRecorderRef.current.pause();
-            }
-            setIsPaused(true);
-            setShowChunkCountdown(false);
-        }
-    };
-
-    const handleContinueRecording = () => {
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'paused') {
-            mediaRecorderRef.current.resume();
-            setIsPaused(false);
-        }
-    };
-
-    const handleEndRecording = () => {
         if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
             mediaRecorderRef.current.stop();
+            setShowChunkCountdown(false);
             // Don't cleanup immediately - wait for onstop to complete conversion
         }
     };
@@ -182,7 +164,6 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
     const handleRecordAgain = () => {
         setRecordedBlob(null);
         setStatus('idle');
-        setIsPaused(false);
         setShowChunkCountdown(false);
         recordedChunksRef.current = [];
     };
@@ -273,9 +254,15 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                     <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white z-20">
                         <p className="text-xl">Chuẩn bị động tác tiếp theo...</p>
                         <p className="text-7xl font-bold">{chunkCountdown}</p>
+                        <button
+                            onClick={handleStopRecording}
+                            className="mt-8 bg-red-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-600 transition"
+                        >
+                            Stop Recording
+                        </button>
                     </div>
                 )}
-                {status === 'recording' && !isPaused && (
+                {status === 'recording' && !showChunkCountdown && (
                     <>
                         <div className="absolute top-4 right-4 flex items-center space-x-2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold z-10">
                             <span className="relative flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span></span>
@@ -284,31 +271,12 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
                             <button
                                 onClick={handleStopRecording}
-                                className="bg-yellow-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-yellow-600 transition"
+                                className="bg-red-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-600 transition"
                             >
                                 Stop Recording
                             </button>
                         </div>
                     </>
-                )}
-                {status === 'recording' && isPaused && (
-                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white space-y-4 z-10">
-                        <p className="text-xl font-semibold">Recording Paused</p>
-                        <div className="flex space-x-4">
-                            <button
-                                onClick={handleContinueRecording}
-                                className="bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-600 transition"
-                            >
-                                Continue
-                            </button>
-                            <button
-                                onClick={handleEndRecording}
-                                className="bg-red-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-red-600 transition"
-                            >
-                                End Video
-                            </button>
-                        </div>
-                    </div>
                 )}
                 {status === 'preview' && videoPreviewSrc && (
                     <video
