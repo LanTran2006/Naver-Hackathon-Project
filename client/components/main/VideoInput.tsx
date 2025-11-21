@@ -55,14 +55,14 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                 const elapsedTime = Date.now() - startTime;
                 const seconds = Math.floor(elapsedTime / 1000);
                 setRecordingTime(seconds);
-                
+
                 // Mỗi 3 giây thì pause và countdown
                 if (seconds > 0 && seconds % 3 === 0) {
                     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
                         mediaRecorderRef.current.pause();
                         setShowChunkCountdown(true);
                         setChunkCountdown(3);
-                        
+
                         // Countdown 3-2-1
                         let count = 3;
                         const countdownInterval = setInterval(() => {
@@ -105,12 +105,12 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
         setRecordedBlob(null);
         setIsPaused(false);
         recordedChunksRef.current = [];
-        
-        const stream = webcamRef.current?.stream || await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+
+        const stream = webcamRef.current?.stream || await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
         if (!stream) return;
-        
+
         streamRef.current = stream;
-        
+
         setStatus('countdown');
         setCountdown(2);
         let count = 2;
@@ -120,21 +120,21 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
             if (count === 0) {
                 clearInterval(countdownInterval);
                 setStatus('recording');
-                
-                mediaRecorderRef.current = new MediaRecorder(stream, { 
+
+                mediaRecorderRef.current = new MediaRecorder(stream, {
                     mimeType: 'video/webm;codecs=vp8',
                     videoBitsPerSecond: 1000000
                 });
-                
+
                 mediaRecorderRef.current.ondataavailable = (event) => {
                     if (event.data.size > 0) {
                         recordedChunksRef.current.push(event.data);
                     }
                 };
-                
+
                 mediaRecorderRef.current.onstop = async () => {
                     const webmBlob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
-                    
+
                     try {
                         setIsConverting(true);
                         console.log('Converting video to MP4...');
@@ -149,7 +149,7 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                         setStatus('preview');
                     }
                 };
-                
+
                 mediaRecorderRef.current.start();
             }
         }, 1000);
@@ -186,7 +186,7 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
         setShowChunkCountdown(false);
         recordedChunksRef.current = [];
     };
-    
+
     const handleDownload = () => {
         if (recordedBlob) {
             const url = URL.createObjectURL(recordedBlob);
@@ -215,7 +215,7 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
             <div className="relative w-full bg-gray-900 rounded-2xl overflow-hidden min-h-[420px] shadow-inner">
                 <Webcam
                     ref={webcamRef}
-                    audio
+                    audio={false}
                     mirrored
                     disablePictureInPicture={false}
                     forceScreenshotSourceSize={false}
@@ -225,7 +225,7 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                     className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ${status === 'preview' ? 'opacity-0' : 'opacity-100'}`}
                     onUserMedia={handleCameraReady}
                     onUserMediaError={handleCameraError}
-                    videoConstraints={{ 
+                    videoConstraints={{
                         facingMode: 'user',
                         width: { ideal: 640 },
                         height: { ideal: 480 },
@@ -275,7 +275,7 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                         <p className="text-7xl font-bold">{chunkCountdown}</p>
                     </div>
                 )}
-                 {status === 'recording' && !isPaused && (
+                {status === 'recording' && !isPaused && (
                     <>
                         <div className="absolute top-4 right-4 flex items-center space-x-2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold z-10">
                             <span className="relative flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span></span>
@@ -315,8 +315,6 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                         src={videoPreviewSrc}
                         className="absolute inset-0 w-full h-full object-cover"
                         controls
-                        autoPlay
-                        loop
                     />
                 )}
             </div>
