@@ -87,24 +87,24 @@ const MainAppPage: React.FC = () => {
     return (
         <div className="h-screen w-screen bg-gray-50 flex flex-col font-sans">
             {/* Header */}
-            <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 px-6 h-18 flex-shrink-0 flex items-center justify-between z-20 sticky top-0">
-                <div className="flex items-center gap-3">
-                    <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-2 rounded-xl text-white shadow-lg shadow-blue-200">
+            <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 h-20 flex-shrink-0 flex items-center justify-between z-20 sticky top-0">
+                <div className="flex items-center gap-6">
+                    <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-200">
                         <LogoIcon className="h-6 w-6" />
                     </div>
-                    <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700 hidden sm:inline">
+                    <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700 hidden sm:inline">
                         LReg
                     </span>
                 </div>
 
-                <div className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-gray-100 rounded-full border border-gray-200">
+                <div className="hidden md:flex items-center gap-2 px-5 py-2 bg-gray-100 rounded-full border border-gray-200">
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                     <span className="text-sm font-medium text-gray-600">AI Communication Assistant</span>
                 </div>
 
                 <button
                     onClick={() => navigateTo(Page.Landing)}
-                    className="group flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-blue-600 px-4 py-2 rounded-xl hover:bg-blue-50 transition-all duration-200"
+                    className="group flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-blue-600 px-5 py-2.5 rounded-xl hover:bg-blue-50 transition-all duration-200"
                 >
                     <span>Back to Home</span>
                     <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
