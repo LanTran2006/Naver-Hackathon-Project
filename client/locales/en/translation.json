@@ -2,7 +2,7 @@
   "landing": {
     "hero": {
       "title": "Give everyone a voice.",
-      "subtitle": "LReg helps speech-impaired users communicate with friends in natural language using AI.",
+      "subtitle": "TalkSign helps speech-impaired users communicate with friends in natural language using AI.",
       "launchApp": "Launch App"
     },
     "nav": {
@@ -62,7 +62,7 @@
     },
     "cta": {
       "title": "Ready to start communicating?",
-      "subtitle": "Try LReg's AI assistant now.",
+      "subtitle": "Try TalkSign's AI assistant now.",
       "button": "Launch App"
     },
     "footer": {

@@ -2,7 +2,7 @@
   "landing": {
     "hero": {
       "title": "Trao tiếng nói cho mọi người.",
-      "subtitle": "LReg giúp người khuyết tật giao tiếp với bạn bè bằng ngôn ngữ tự nhiên nhờ AI.",
+      "subtitle": "TalkSign giúp người khuyết tật giao tiếp với bạn bè bằng ngôn ngữ tự nhiên nhờ AI.",
       "launchApp": "Khởi động ứng dụng"
     },
     "nav": {
@@ -62,7 +62,7 @@
     },
     "cta": {
       "title": "Sẵn sàng bắt đầu giao tiếp?",
-      "subtitle": "Thử trợ lý AI của LReg ngay bây giờ.",
+      "subtitle": "Thử trợ lý AI của TalkSign ngay bây giờ.",
       "button": "Khởi động ứng dụng"
     },
     "footer": {

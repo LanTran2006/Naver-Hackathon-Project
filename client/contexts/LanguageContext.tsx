@@ -19,7 +19,7 @@ const translations: Record<Language, Record<string, string>> = {
   en: {
     // Landing Page
     'landing.hero.title': 'Give everyone a voice.',
-    'landing.hero.subtitle': 'LReg helps speech-impaired users communicate with friends in natural language using AI.',
+    'landing.hero.subtitle': 'TalkSign helps speech-impaired users communicate with friends in natural language using AI.',
     'landing.hero.launchApp': 'Launch App',
     'landing.howItWorks.title': 'How it works',
     'landing.howItWorks.subtitle': 'A simple, three-step process to seamless communication.',
@@ -48,7 +48,7 @@ const translations: Record<Language, Record<string, string>> = {
     'landing.accessibility.feature2': 'High contrast and readable fonts to ensure clarity for visually impaired users.',
     'landing.accessibility.feature3': 'Your privacy is respected. No data is stored without an account.',
     'landing.cta.title': 'Ready to start communicating?',
-    'landing.cta.subtitle': 'Try LReg\'s AI assistant now.',
+    'landing.cta.subtitle': 'Try TalkSign\'s AI assistant now.',
     'landing.cta.button': 'Launch App',
     'landing.nav.features': 'Features',
     'landing.nav.howItWorks': 'How it works',
@@ -83,7 +83,7 @@ const translations: Record<Language, Record<string, string>> = {
   vi: {
     // Landing Page
     'landing.hero.title': 'Trao tiếng nói cho mọi người.',
-    'landing.hero.subtitle': 'LReg giúp người khuyết tật giao tiếp với bạn bè bằng ngôn ngữ tự nhiên nhờ AI.',
+    'landing.hero.subtitle': 'TalkSign giúp người khuyết tật giao tiếp với bạn bè bằng ngôn ngữ tự nhiên nhờ AI.',
     'landing.hero.launchApp': 'Khởi động ứng dụng',
     'landing.howItWorks.title': 'Cách hoạt động',
     'landing.howItWorks.subtitle': 'Quy trình đơn giản ba bước để giao tiếp liền mạch.',
@@ -112,7 +112,7 @@ const translations: Record<Language, Record<string, string>> = {
     'landing.accessibility.feature2': 'Độ tương phản cao và phông chữ dễ đọc để đảm bảo rõ ràng cho người khiếm thị.',
     'landing.accessibility.feature3': 'Quyền riêng tư của bạn được tôn trọng. Không có dữ liệu nào được lưu trữ mà không có tài khoản.',
     'landing.cta.title': 'Sẵn sàng bắt đầu giao tiếp?',
-    'landing.cta.subtitle': 'Thử trợ lý AI của LReg ngay bây giờ.',
+    'landing.cta.subtitle': 'Thử trợ lý AI của TalkSign ngay bây giờ.',
     'landing.cta.button': 'Khởi động ứng dụng',
     'landing.nav.features': 'Tính năng',
     'landing.nav.howItWorks': 'Cách hoạt động',

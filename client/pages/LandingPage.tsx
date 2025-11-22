@@ -5,6 +5,7 @@ import { LogoIcon, VideoIcon, BrainCircuitIcon, MessageSquareIcon, SparklesIcon,
 import VideoDemo from '../components/landing/VideoDemo';
 import LanguageToggle from '../components/common/LanguageToggle';
 import { useTranslation } from 'react-i18next';
+import Logo from '../components/images/talksign-logo.webp';
 
 const Header: React.FC = () => {
     const app = useContext(AppContext);
@@ -14,8 +15,7 @@ const Header: React.FC = () => {
         <header className="bg-white/80 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-gray-200">
             <div className="container mx-auto px-6 py-3 flex justify-between items-center">
                 <div className="flex items-center space-x-2">
-                    <LogoIcon className="h-8 w-8 text-primary" />
-                    <span className="text-2xl font-bold text-gray-800">LReg</span>
+                    <img src={Logo} alt="Logo" className="h-8 w-full text-primary" />
                 </div>
                 <nav className="hidden md:flex items-center space-x-8">
                     <a href="#features" className="text-gray-600 hover:text-primary transition">{t('landing.nav.features')}</a>
@@ -41,7 +41,7 @@ const Footer: React.FC = () => {
             <div className="container mx-auto px-6 py-8 text-center text-gray-500">
                 <div className="flex justify-center items-center space-x-2 mb-4">
                      <LogoIcon className="h-6 w-6 text-gray-400" />
-                     <span className="text-lg font-semibold text-gray-600">LReg</span>
+                     <span className="text-lg font-semibold text-gray-600">TalkSign</span>
                 </div>
                 <div className="flex justify-center space-x-6 mb-4">
                     <a href="#" className="hover:text-primary">{t('landing.footer.about')}</a>
@@ -49,7 +49,7 @@ const Footer: React.FC = () => {
                     <a href="#" className="hover:text-primary">{t('landing.footer.privacy')}</a>
                     <a href="#" className="hover:text-primary">{t('landing.footer.contact')}</a>
                 </div>
-                <p>&copy; {new Date().getFullYear()} LReg. {t('landing.footer.copyright')}</p>
+                <p>&copy; {new Date().getFullYear()} TalkSign. {t('landing.footer.copyright')}</p>
             </div>
         </footer>
     );

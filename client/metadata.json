@@ -1,5 +1,5 @@
 {
-  "name": "LReg - AI Communication Assistant",
+  "name": "TalkSign - AI Communication Assistant",
   "description": "An AI-powered communication assistant for speech-impaired users, featuring real-time chat, AI interpretation of video/audio, and assistive reply suggestions.",
   "requestFramePermissions": [
     "camera",

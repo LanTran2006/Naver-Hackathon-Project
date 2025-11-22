@@ -6,6 +6,7 @@ import ConversationColumn from '../components/main/ChatColumn'; // Cột chat.
 import { LogoIcon } from '../components/common/Icons'; // Logo.
 import { summarizeConversation } from '../services/gemini'; // Helper tóm tắt Gemini.
 import { useTranslation } from 'react-i18next';
+import Logo from '../components/images/talksign-logo.webp';
 
 const MainAppPage: React.FC = () => {
     const app = useContext(AppContext);
@@ -81,8 +82,7 @@ const MainAppPage: React.FC = () => {
         <div className="h-screen w-screen bg-gray-50 flex flex-col">
             <header className="bg-white border-b border-gray-200 px-4 h-16 flex-shrink-0 flex items-center justify-between z-10">
                 <div className="flex items-center space-x-2">
-                    <LogoIcon className="h-8 w-8 text-primary" />
-                    <span className="text-xl font-bold text-gray-800 hidden sm:inline">LReg</span>
+                    <img src={Logo} alt="Logo" className="h-8 w-full text-primary" />
                 </div>
                 <div className="text-lg font-semibold text-gray-700 hidden md:block">{t('app.header.title')}</div>
                 <button onClick={() => navigateTo(Page.Landing)} className="text-sm font-medium text-gray-600 hover:text-primary px-4 py-2 rounded-lg hover:bg-gray-100 transition">

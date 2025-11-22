@@ -371,7 +371,7 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                     </button>
                 </div>
             )}
-            <p className="text-xs text-gray-500 text-center mt-4">LReg optimizes video frames before sending them to the backend.</p>
+            <p className="text-xs text-gray-500 text-center mt-4">TalkSign optimizes video frames before sending them to the backend.</p>
         </div>
     );
 };

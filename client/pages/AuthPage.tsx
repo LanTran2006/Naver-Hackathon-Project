@@ -97,7 +97,7 @@ const AuthPage: React.FC = () => {
             <a onClick={() => auth?.navigateTo(Page.Landing)} className="absolute top-4 left-4 text-sm text-gray-600 hover:text-primary cursor-pointer">&larr; Back to home</a>
             <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
                 <LogoIcon className="mx-auto h-12 w-auto text-primary" />
-                <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Welcome to LReg</h2>
+                <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Welcome to TalkSign</h2>
             </div>
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
