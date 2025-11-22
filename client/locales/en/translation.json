@@ -1,0 +1,175 @@
+{
+  "landing": {
+    "hero": {
+      "title": "Give everyone a voice.",
+      "subtitle": "LReg helps speech-impaired users communicate with friends in natural language using AI.",
+      "launchApp": "Launch App"
+    },
+    "nav": {
+      "features": "Features",
+      "howItWorks": "How it works",
+      "faq": "FAQ"
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "A simple, three-step process to seamless communication.",
+      "step1": {
+        "title": "1. Record or Upload",
+        "desc": "Record or upload a short video or audio clip of what you want to communicate."
+      },
+      "step2": {
+        "title": "2. AI Interpretation",
+        "desc": "Our AI understands gestures and speech, converting them into clear text."
+      },
+      "step3": {
+        "title": "3. Communicate",
+        "desc": "Use the generated text to communicate clearly and effectively."
+      }
+    },
+    "features": {
+      "title": "Key Features",
+      "aiInterpretation": {
+        "title": "AI Video & Audio Interpretation",
+        "desc": "State-of-the-art AI to translate visual and auditory cues into text."
+      },
+      "realtime": {
+        "title": "Real-time Text Generation",
+        "desc": "Convert your intent into clear, natural language instantly."
+      },
+      "rephrasing": {
+        "title": "AI-Assisted Rephrasing",
+        "desc": "Get intelligent suggestions to refine your message."
+      },
+      "history": {
+        "title": "Temporary Session History",
+        "desc": "Keep track of your generated messages during your session."
+      },
+      "voiceText": {
+        "title": "Voice ↔ Text Conversion",
+        "desc": "Seamlessly convert text to speech and speech to text."
+      },
+      "accessible": {
+        "title": "Accessible by Design",
+        "desc": "High contrast, large controls, and simple flows for everyone."
+      }
+    },
+    "accessibility": {
+      "title": "Accessibility and Privacy First",
+      "subtitle": "We are committed to building a platform that is not only powerful but also inclusive and secure for all our users.",
+      "feature1": "Large buttons, big icons, and simple workflows for ease of use.",
+      "feature2": "High contrast and readable fonts to ensure clarity for visually impaired users.",
+      "feature3": "Your privacy is respected. No data is stored without an account."
+    },
+    "cta": {
+      "title": "Ready to start communicating?",
+      "subtitle": "Try LReg's AI assistant now.",
+      "button": "Launch App"
+    },
+    "footer": {
+      "about": "About",
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "contact": "Contact",
+      "copyright": "All rights reserved."
+    }
+  },
+  "app": {
+    "header": {
+      "title": "AI Communication Assistant",
+      "backToHome": "Back to Home"
+    },
+    "video": {
+      "allowCamera": "Allow the browser to use your webcam for preview.",
+      "readyToRecord": "Ready to record",
+      "startRecording": "Start recording",
+      "audioOn": "Audio On",
+      "audioOff": "Audio Off",
+      "getReady": "Get ready...",
+      "stopRecording": "Stop Recording",
+      "continueRecording": "Continue Recording",
+      "endRecording": "End Recording",
+      "recordAgain": "Record Again",
+      "download": "Download",
+      "downloadVideo": "Download video",
+      "send": "Send to AI",
+      "processing": "Processing...",
+      "preparing": "Preparing next gesture...",
+      "recording": "Recording... {{time}}s",
+      "rec": "REC {{time}}s"
+    },
+    "tabs": {
+      "video": "Video",
+      "upload": "Upload File",
+      "text": "Text"
+    },
+    "advanced": {
+      "show": "Show advanced options",
+      "hide": "Hide advanced options"
+    },
+    "speech": {
+      "autoRead": "Voice AI Reading",
+      "title": "Auto-read responses",
+      "enabled": "Ready to read new responses",
+      "disabled": "Disabled (will not auto-read)",
+      "reading": "Reading new response",
+      "listening": "Listening... speak naturally.",
+      "notSupported": "Not supported on this browser",
+      "toggle": {
+        "enable": "Enable auto-read",
+        "disable": "Disable auto-read"
+      },
+      "note": "Only reads new AI responses (left column). If you turn it off, the reading queue will be cleared immediately.",
+      "browserNote": "Browser does not support Web Speech API, so voice input is not available."
+    },
+    "text": {
+      "placeholder": "Describe what you want to say...",
+      "send": "Send",
+      "understanding": "Understanding...",
+      "understandThis": "Understand this for me",
+      "suggestion": "Get AI suggestion",
+      "clear": "Clear"
+    },
+    "upload": {
+      "filePreview": "File Preview:",
+      "chooseAnother": "Choose another file",
+      "sendFile": "Send file to AI",
+      "sending": "Sending...",
+      "clickToSelect": "Click to select a file",
+      "dragDrop": "or drag and drop audio/video files here",
+      "selectFile": "Select a file",
+      "uploading": "Uploading...",
+      "supported": "Supported formats: MP4, AVI, WEBM"
+    },
+    "ai": {
+      "coreIntent": "Core Intent",
+      "fullSentence": "Full Sentence",
+      "copyText": "Copy Text",
+      "copied": "Copied!",
+      "playVoice": "Play as voice",
+      "rephrase": "Rephrase for clarity"
+    },
+    "friends": {
+      "searchPlaceholder": "Search by email...",
+      "searchButton": "Search"
+    },
+    "chat": {
+      "title": "Conversation",
+      "summarize": "Summarize",
+      "summarizing": "Summarizing...",
+      "summarySender": "Summarize Conversation",
+      "emptyTitle": "AI responses will appear here.",
+      "emptySubtitle": "Use an input method on the left to start a conversation.",
+      "replyPlaceholder": "Reply here...",
+      "errorMinMessages": "Need at least one exchange between Friend and AI to summarize.",
+      "errorSummarize": "Unable to summarize conversation at this time."
+    },
+    "messages": {
+      "processing": "Processing video...",
+      "processingSegment": "Processing segment {{current}}/{{total}}: \"{{label}}\"",
+      "currentResult": "Current result: {{result}}",
+      "completed": "AI has finished recognition!",
+      "result": "Result: \"{{result}}\"",
+      "error": "Sorry, something went wrong while processing the video: {{message}}"
+    }
+  }
+}

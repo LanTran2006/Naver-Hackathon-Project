@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Friend, User } from '../../types';
+import { useTranslation } from 'react-i18next';
 
 interface FriendsSidebarProps {
     friends: Friend[];
@@ -10,6 +11,7 @@ interface FriendsSidebarProps {
 }
 
 const FriendsSidebar: React.FC<FriendsSidebarProps> = ({ friends, selectedFriend, onSelectFriend, user }) => {
+    const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleSearch = (e: React.FormEvent) => {
@@ -39,10 +41,10 @@ const FriendsSidebar: React.FC<FriendsSidebarProps> = ({ friends, selectedFriend
                         type="text" 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search by email..." 
-                        className="flex-grow px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary"
+                        placeholder={t('app.friends.searchPlaceholder')} 
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary" 
                     />
-                    <button type="submit" className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-hover">Search</button>
+                    <button type="submit" className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-hover">{t('app.friends.searchButton')}</button>
                 </form>
             </div>
             

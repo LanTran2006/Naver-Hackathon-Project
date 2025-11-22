@@ -1,0 +1,175 @@
+{
+  "landing": {
+    "hero": {
+      "title": "Trao tiếng nói cho mọi người.",
+      "subtitle": "LReg giúp người khuyết tật giao tiếp với bạn bè bằng ngôn ngữ tự nhiên nhờ AI.",
+      "launchApp": "Khởi động ứng dụng"
+    },
+    "nav": {
+      "features": "Tính năng",
+      "howItWorks": "Cách hoạt động",
+      "faq": "Câu hỏi thường gặp"
+    },
+    "howItWorks": {
+      "title": "Cách hoạt động",
+      "subtitle": "Quy trình đơn giản ba bước để giao tiếp liền mạch.",
+      "step1": {
+        "title": "1. Ghi hoặc Tải lên",
+        "desc": "Ghi hoặc tải lên video hoặc âm thanh ngắn về những gì bạn muốn truyền đạt."
+      },
+      "step2": {
+        "title": "2. Diễn giải bằng AI",
+        "desc": "AI của chúng tôi hiểu cử chỉ và lời nói, chuyển đổi chúng thành văn bản rõ ràng."
+      },
+      "step3": {
+        "title": "3. Giao tiếp",
+        "desc": "Sử dụng văn bản được tạo để giao tiếp rõ ràng và hiệu quả."
+      }
+    },
+    "features": {
+      "title": "Tính năng chính",
+      "aiInterpretation": {
+        "title": "Diễn giải Video & Âm thanh bằng AI",
+        "desc": "AI hiện đại để dịch tín hiệu hình ảnh và âm thanh thành văn bản."
+      },
+      "realtime": {
+        "title": "Tạo văn bản theo thời gian thực",
+        "desc": "Chuyển đổi ý định của bạn thành ngôn ngữ tự nhiên rõ ràng ngay lập tức."
+      },
+      "rephrasing": {
+        "title": "Hỗ trợ diễn đạt lại bằng AI",
+        "desc": "Nhận gợi ý thông minh để tinh chỉnh tin nhắn của bạn."
+      },
+      "history": {
+        "title": "Lịch sử phiên tạm thời",
+        "desc": "Theo dõi các tin nhắn đã tạo trong phiên của bạn."
+      },
+      "voiceText": {
+        "title": "Chuyển đổi Giọng nói ↔ Văn bản",
+        "desc": "Chuyển đổi văn bản thành giọng nói và ngược lại một cách liền mạch."
+      },
+      "accessible": {
+        "title": "Thiết kế dễ tiếp cận",
+        "desc": "Độ tương phản cao, điều khiển lớn và quy trình đơn giản cho mọi người."
+      }
+    },
+    "accessibility": {
+      "title": "Ưu tiên khả năng tiếp cận và bảo mật",
+      "subtitle": "Chúng tôi cam kết xây dựng một nền tảng không chỉ mạnh mẽ mà còn toàn diện và an toàn cho tất cả người dùng.",
+      "feature1": "Nút lớn, biểu tượng to và quy trình đơn giản để dễ sử dụng.",
+      "feature2": "Độ tương phản cao và phông chữ dễ đọc để đảm bảo rõ ràng cho người khiếm thị.",
+      "feature3": "Quyền riêng tư của bạn được tôn trọng. Không có dữ liệu nào được lưu trữ mà không có tài khoản."
+    },
+    "cta": {
+      "title": "Sẵn sàng bắt đầu giao tiếp?",
+      "subtitle": "Thử trợ lý AI của LReg ngay bây giờ.",
+      "button": "Khởi động ứng dụng"
+    },
+    "footer": {
+      "about": "Giới thiệu",
+      "terms": "Điều khoản",
+      "privacy": "Bảo mật",
+      "contact": "Liên hệ",
+      "copyright": "Bảo lưu mọi quyền."
+    }
+  },
+  "app": {
+    "header": {
+      "title": "Trợ lý giao tiếp AI",
+      "backToHome": "Về trang chủ"
+    },
+    "video": {
+      "allowCamera": "Cho phép trình duyệt sử dụng webcam của bạn để xem trước.",
+      "readyToRecord": "Sẵn sàng ghi hình",
+      "startRecording": "Bắt đầu ghi hình",
+      "audioOn": "Bật âm thanh",
+      "audioOff": "Tắt âm thanh",
+      "getReady": "Chuẩn bị...",
+      "stopRecording": "Dừng ghi",
+      "continueRecording": "Tiếp tục ghi",
+      "endRecording": "Kết thúc ghi",
+      "recordAgain": "Ghi lại",
+      "download": "Tải xuống",
+      "downloadVideo": "Tải video xuống",
+      "send": "Gửi đến AI",
+      "processing": "Đang xử lý...",
+      "preparing": "Chuẩn bị động tác tiếp theo...",
+      "recording": "Đang ghi... {{time}}s",
+      "rec": "GHI {{time}}s"
+    },
+    "tabs": {
+      "video": "Video",
+      "upload": "Tải lên tệp",
+      "text": "Văn bản"
+    },
+    "advanced": {
+      "show": "Hiển thị tùy chọn nâng cao",
+      "hide": "Ẩn tùy chọn nâng cao"
+    },
+    "speech": {
+      "autoRead": "Giọng đọc AI",
+      "title": "Tự động đọc phản hồi",
+      "enabled": "Sẵn sàng đọc phản hồi mới",
+      "disabled": "Đang tắt (sẽ không đọc tự động)",
+      "reading": "Đang đọc phản hồi mới",
+      "listening": "Đang nghe... hãy nói tự nhiên.",
+      "notSupported": "Không hỗ trợ trên trình duyệt này",
+      "toggle": {
+        "enable": "Bật đọc tự động",
+        "disable": "Tắt đọc tự động"
+      },
+      "note": "Chỉ đọc các phản hồi mới của AI (cột bên trái). Nếu bạn tắt đi, hàng đợi đọc sẽ được xoá ngay lập tức.",
+      "browserNote": "Trình duyệt hiện không hỗ trợ Web Speech API nên không thể nhập bằng giọng nói."
+    },
+    "text": {
+      "placeholder": "Mô tả những gì bạn muốn nói...",
+      "send": "Gửi",
+      "understanding": "Đang hiểu...",
+      "understandThis": "Hiểu điều này cho tôi",
+      "suggestion": "Nhận gợi ý từ AI",
+      "clear": "Xóa"
+    },
+    "upload": {
+      "filePreview": "Xem trước tệp:",
+      "chooseAnother": "Chọn tệp khác",
+      "sendFile": "Gửi tệp đến AI",
+      "sending": "Đang gửi...",
+      "clickToSelect": "Nhấp để chọn một tệp",
+      "dragDrop": "hoặc kéo và thả tệp âm thanh/video vào đây",
+      "selectFile": "Chọn một tệp",
+      "uploading": "Đang tải lên...",
+      "supported": "Định dạng hỗ trợ: MP4, AVI, WEBM"
+    },
+    "ai": {
+      "coreIntent": "Ý định chính",
+      "fullSentence": "Câu đầy đủ",
+      "copyText": "Sao chép văn bản",
+      "copied": "Đã sao chép!",
+      "playVoice": "Phát giọng nói",
+      "rephrase": "Diễn đạt lại rõ hơn"
+    },
+    "friends": {
+      "searchPlaceholder": "Tìm theo email...",
+      "searchButton": "Tìm kiếm"
+    },
+    "chat": {
+      "title": "Hội thoại",
+      "summarize": "Tóm tắt",
+      "summarizing": "Đang tóm tắt...",
+      "summarySender": "Tóm tắt hội thoại",
+      "emptyTitle": "Câu trả lời của AI sẽ xuất hiện ở đây.",
+      "emptySubtitle": "Sử dụng phương thức nhập bên trái để bắt đầu cuộc trò chuyện.",
+      "replyPlaceholder": "Trả lời ở đây...",
+      "errorMinMessages": "Cần ít nhất một lượt trao đổi giữa Friend và AI để tóm tắt.",
+      "errorSummarize": "Không thể tóm tắt hội thoại lúc này."
+    },
+    "messages": {
+      "processing": "Đang xử lý video...",
+      "processingSegment": "Đang xử lý đoạn {{current}}/{{total}}: \"{{label}}\"",
+      "currentResult": "Kết quả hiện tại: {{result}}",
+      "completed": "AI đã nhận diện xong!",
+      "result": "Kết quả: \"{{result}}\"",
+      "error": "Xin lỗi, đã xảy ra lỗi khi xử lý video: {{message}}"
+    }
+  }
+}

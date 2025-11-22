@@ -4,8 +4,10 @@ import Webcam from 'react-webcam';
 import { VideoIcon, SparklesIcon } from '../common/Icons';
 import { uploadVideoInChunks } from '../../api';
 import { RecordingStatus } from '../../types';
+import { useTranslation } from 'react-i18next';
 
 const VideoDemo: React.FC = () => {
+    const { t } = useTranslation();
     const webcamRef = useRef<Webcam>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const recordedChunksRef = useRef<Blob[]>([]);
@@ -146,7 +148,7 @@ const VideoDemo: React.FC = () => {
     const handleSendToAI = async () => {
         if (!recordedBlob) return;
         setIsSending(true);
-        setAiResponse('🎬 Đang xử lý video...');
+        setAiResponse(`🎬 ${t('app.messages.processing')}`);
         console.log('Sending landing demo video to FastAPI backend');
         try {
             const collectedWords: string[] = [];
@@ -154,21 +156,21 @@ const VideoDemo: React.FC = () => {
             await uploadVideoInChunks(recordedBlob, (current, total, label) => {
                 collectedWords.push(label);
                 setAiResponse(
-                    `📊 Đang xử lý đoạn ${current}/${total}: "${label}"\n\n` +
-                    `Kết quả hiện tại: ${collectedWords.join(' ')}`
+                    `📊 ${t('app.messages.processingSegment', { current, total, label })}\n\n` +
+                    `${t('app.messages.currentResult', { result: collectedWords.join(' ') })}`
                 );
             });
             
             setAiResponse(
-                `✅ AI đã nhận diện xong!\n\n` +
-                `Kết quả: "${collectedWords.join(' ')}"`
+                `✅ ${t('app.messages.completed')}\n\n` +
+                `${t('app.messages.result', { result: collectedWords.join(' ') })}`
             );
         } catch (error: any) {
             const message =
                 typeof error?.message === 'string'
                     ? error.message
-                    : 'An error occurred while processing the video.';
-            setAiResponse(`❌ Sorry, something went wrong: ${message}`);
+                    : t('app.messages.error', { message: 'Unknown error' });
+            setAiResponse(`❌ ${t('app.messages.error', { message })}`);
         } finally {
             setIsSending(false);
         }
@@ -207,18 +209,18 @@ const VideoDemo: React.FC = () => {
                         {!cameraReady ? (
                             <>
                                 <VideoIcon className="w-16 h-16 opacity-80" />
-                                <p className="text-lg font-semibold">Allow the browser to use your webcam for preview.</p>
+                                <p className="text-lg font-semibold">{t('app.video.allowCamera')}</p>
                                 {cameraError && <p className="text-sm text-red-200">{cameraError}</p>}
                             </>
                         ) : (
                             <>
                                 <VideoIcon className="w-12 h-12 opacity-80 mx-auto" />
-                                <p className="font-medium">Preview your webcam feed here.</p>
+                                <p className="font-medium">{t('app.video.readyToRecord')}</p>
                                 <button
                                     onClick={handleStartRecording}
                                     className="bg-primary text-white font-semibold py-2 px-6 rounded-lg hover:bg-primary-hover transition"
                                 >
-                                    Start recording
+                                    {t('app.video.startRecording')}
                                 </button>
                             </>
                         )}
@@ -226,7 +228,7 @@ const VideoDemo: React.FC = () => {
                 )}
                 {status === 'countdown' && (
                     <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white">
-                        <p className="text-xl">Get ready...</p>
+                        <p className="text-xl">{t('app.video.getReady')}</p>
                         <p className="text-7xl font-bold">{countdown}</p>
                     </div>
                 )}
@@ -237,33 +239,33 @@ const VideoDemo: React.FC = () => {
                               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                               <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
                             </span>
-                            <span>REC {recordingTime}s</span>
+                            <span>{t('app.video.rec', { time: recordingTime })}</span>
                         </div>
                         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
                             <button
                                 onClick={handleStopRecording}
                                 className="bg-yellow-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-yellow-600 transition"
                             >
-                                Stop Recording
+                                {t('app.video.stopRecording')}
                             </button>
                         </div>
                     </>
                 )}
                 {status === 'recording' && isPaused && (
                     <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white space-y-4">
-                        <p className="text-xl font-semibold">Recording Paused</p>
+                        <p className="text-xl font-semibold">{t('app.video.stopRecording')}</p>
                         <div className="flex space-x-4">
                             <button
                                 onClick={handleContinueRecording}
                                 className="bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-600 transition"
                             >
-                                Continue
+                                {t('app.video.continueRecording')}
                             </button>
                             <button
                                 onClick={handleEndRecording}
                                 className="bg-red-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-red-600 transition"
                             >
-                                End Video
+                                {t('app.video.endRecording')}
                             </button>
                         </div>
                     </div>
@@ -287,17 +289,17 @@ const VideoDemo: React.FC = () => {
                         className="w-full bg-primary text-white font-semibold py-3 px-6 rounded-lg text-lg flex items-center justify-center gap-2 hover:bg-primary-hover transition disabled:bg-gray-400"
                     >
                         <VideoIcon className="w-6 h-6" />
-                        Start Recording
+                        {t('app.video.startRecording')}
                     </button>
                 ) : (
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-3">
-                            <button onClick={handleDownload} className="bg-secondary text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-secondary-hover transition">Download video</button>
-                            <button onClick={resetDemo} className="bg-secondary text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-secondary-hover transition">Record again</button>
+                            <button onClick={handleDownload} className="bg-secondary text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-secondary-hover transition">{t('app.video.downloadVideo')}</button>
+                            <button onClick={resetDemo} className="bg-secondary text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-secondary-hover transition">{t('app.video.recordAgain')}</button>
                         </div>
                         <button onClick={handleSendToAI} disabled={isSending} className="w-full bg-accent text-white font-semibold py-3 px-6 rounded-lg text-lg flex items-center justify-center gap-2 hover:bg-green-600 transition disabled:bg-gray-400">
                            <SparklesIcon className="w-6 h-6" />
-                           {isSending ? 'Analyzing...' : 'Send to AI demo'}
+                           {isSending ? t('app.video.processing') : t('app.video.send')}
                         </button>
                         
                         {aiResponse && (

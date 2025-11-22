@@ -4,6 +4,7 @@ import { SendIcon, MicIcon, FileTextIcon } from '../common/Icons'; // Biểu tư
 import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis'; // Hook đọc giọng.
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition'; // Hook nhận dạng giọng nói.
 import SpeechControls from './SpeechControls'; // Component popover bật/tắt đọc tự động.
+import { useTranslation } from 'react-i18next';
 
 interface ConversationColumnProps {
     messages: ChatMessage[];
@@ -13,6 +14,7 @@ interface ConversationColumnProps {
 }
 
 const ConversationColumn: React.FC<ConversationColumnProps> = ({ messages, onSendMessage, onSummarize, isSummarizing }) => {
+    const { t } = useTranslation();
     const chatEndRef = useRef<HTMLDivElement>(null);
     const [inputText, setInputText] = useState(''); // State input người dùng.
     const [isSpeechEnabled, setIsSpeechEnabled] = useState(false); // Cho biết đang bật đọc tự động hay không.
@@ -118,7 +120,7 @@ const ConversationColumn: React.FC<ConversationColumnProps> = ({ messages, onSen
         <div className="bg-white border-l border-gray-200 h-full flex flex-col">
             {/* Header */}
             <div className="p-4 border-b border-gray-200 flex-shrink-0 flex items-center justify-between gap-3 flex-wrap">
-                 <h3 className="font-semibold text-gray-800 text-lg">Conversation</h3>
+                 <h3 className="font-semibold text-gray-800 text-lg">{t('app.chat.title')}</h3>
                  <div className="flex items-center gap-2">
                     <SpeechControls
                         isEnabled={isSpeechEnabled}
@@ -132,7 +134,7 @@ const ConversationColumn: React.FC<ConversationColumnProps> = ({ messages, onSen
                         className="flex items-center space-x-2 text-sm font-medium text-primary hover:bg-primary-light px-3 py-1.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <FileTextIcon className="w-4 h-4" />
-                        <span>{isSummarizing ? 'Summarizing...' : 'Summarize'}</span>
+                        <span>{isSummarizing ? t('app.chat.summarizing') : t('app.chat.summarize')}</span>
                     </button>
                  </div>
             </div>
@@ -142,8 +144,8 @@ const ConversationColumn: React.FC<ConversationColumnProps> = ({ messages, onSen
                 {messages.length === 0 ? (
                      <div className="h-full flex flex-col items-center justify-center text-center text-gray-500">
                         <svg className="w-16 h-16 mb-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5L2.5 21.5l4.5-.838A9.955 9.955 0 0 0 12 22z"></path></svg>
-                        <p className="font-medium">AI responses will appear here.</p>
-                        <p className="text-sm">Use an input method on the left to start a conversation.</p>
+                        <p className="font-medium">{t('app.chat.emptyTitle')}</p>
+                        <p className="text-sm">{t('app.chat.emptySubtitle')}</p>
                     </div>
                 ) : (
                     <div className="space-y-4">
@@ -169,7 +171,7 @@ const ConversationColumn: React.FC<ConversationColumnProps> = ({ messages, onSen
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                        placeholder="Reply here..."
+                        placeholder={t('app.chat.replyPlaceholder')}
                         className="flex-grow px-4 py-3 border border-gray-300 rounded-full bg-gray-100 focus:ring-primary focus:border-primary focus:bg-white"
                     />
                      <button
@@ -186,14 +188,14 @@ const ConversationColumn: React.FC<ConversationColumnProps> = ({ messages, onSen
                     </button>
                 </div>
                 {isListening && (
-                    <p className="mt-2 text-sm text-primary">Đang nghe... hãy nói tiếng Việt tự nhiên.</p>
+                    <p className="mt-2 text-sm text-primary">{t('app.speech.listening')}</p>
                 )}
                 {recognitionError && (
                     <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{recognitionError}</p>
                 )}
                 {!isRecognitionSupported && (
                     <p className="mt-2 rounded-lg bg-yellow-50 px-3 py-2 text-xs text-yellow-800">
-                        Trình duyệt hiện không hỗ trợ Web Speech API nên không thể nhập bằng giọng nói.
+                        {t('app.speech.browserNote')}
                     </p>
                 )}
             </div>

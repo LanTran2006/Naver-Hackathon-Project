@@ -1,11 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { UploadCloudIcon, SparklesIcon } from '../common/Icons';
+import { useTranslation } from 'react-i18next';
 
 interface FileUploadInputProps {
     onSendToAI: (file: File) => Promise<void>;
 }
 
 const FileUploadInput: React.FC<FileUploadInputProps> = ({ onSendToAI }) => {
+    const { t } = useTranslation();
     const [isSending, setIsSending] = useState(false);
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
     
@@ -52,7 +54,7 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({ onSendToAI }) => {
 
             {uploadedFile ? (
                 <div className="w-full space-y-4 p-4 md:p-0 text-center">
-                    <p className="font-semibold">File Preview: <span className="font-normal text-gray-600 truncate">{uploadedFile.name}</span></p>
+                    <p className="font-semibold">{t('app.upload.filePreview')} <span className="font-normal text-gray-600 truncate">{uploadedFile.name}</span></p>
                     {uploadedFile.type.startsWith('audio/') && (
                         <audio src={URL.createObjectURL(uploadedFile)} controls className="w-full" />
                     )}
@@ -63,11 +65,11 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({ onSendToAI }) => {
                     )}
                     <div className="grid grid-cols-2 gap-3">
                         <button onClick={handleClearUpload} className="w-full bg-secondary text-gray-700 font-medium py-3 rounded-lg hover:bg-secondary-hover transition">
-                            Choose another file
+                            {t('app.upload.chooseAnother')}
                         </button>
                         <button onClick={handleSendUploaded} disabled={isSending} className="w-full bg-accent text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-green-600 transition disabled:bg-gray-400">
                              <SparklesIcon className="w-5 h-5" />
-                            {isSending ? 'Sending...' : 'Send file to AI'}
+                            {isSending ? t('app.upload.sending') : t('app.upload.sendFile')}
                         </button>
                     </div>
                 </div>
@@ -78,8 +80,8 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({ onSendToAI }) => {
                 >
                     <div className="flex flex-col items-center justify-center text-gray-500">
                         <UploadCloudIcon className="w-16 h-16 mb-4" />
-                        <p className="font-semibold text-lg">Click to select a file</p>
-                        <p className="text-sm">or drag and drop audio/video files here</p>
+                        <p className="font-semibold text-lg">{t('app.upload.clickToSelect')}</p>
+                        <p className="text-sm">{t('app.upload.dragDrop')}</p>
                     </div>
                 </div>
             )}

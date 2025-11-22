@@ -5,10 +5,12 @@ import InputColumn from '../components/main/InputColumn'; // Cột input.
 import ConversationColumn from '../components/main/ChatColumn'; // Cột chat.
 import { LogoIcon } from '../components/common/Icons'; // Logo.
 import { summarizeConversation } from '../services/gemini'; // Helper tóm tắt Gemini.
+import { useTranslation } from 'react-i18next';
 
 const MainAppPage: React.FC = () => {
     const app = useContext(AppContext);
     const { navigateTo } = app!;
+    const { t } = useTranslation();
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [isSummarizing, setIsSummarizing] = useState(false); // Flag đang summarize.
     const [summarizeError, setSummarizeError] = useState<string | null>(null); // Lưu lỗi summarize.
@@ -46,7 +48,7 @@ const MainAppPage: React.FC = () => {
 
         if (summarizableMessages.length < 2) {
             setIsSummarizing(false);
-            setSummarizeError('Cần ít nhất một lượt trao đổi giữa Friend và AI để tóm tắt.'); // Báo lỗi rõ ràng.
+            setSummarizeError(t('app.chat.errorMinMessages')); // Báo lỗi rõ ràng.
             return;
         }
 
@@ -61,14 +63,14 @@ const MainAppPage: React.FC = () => {
         const summary = await summarizeConversation(conversationText); // Gọi Gemini.
             const summaryMessage: ChatMessage = {
                 id: `summary-${Date.now()}`,
-            sender: 'Summarize Conversation',
+            sender: t('app.chat.summarySender'),
             text: summary,
                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }; // Tạo message summarize thuần văn bản.
             setMessages(prev => [...prev, summaryMessage]); // Thêm vào danh sách.
         } catch (error) {
             const message =
-                (error as Error)?.message || 'Không thể tóm tắt hội thoại lúc này.'; // Lấy lỗi thân thiện.
+                (error as Error)?.message || t('app.chat.errorSummarize'); // Lấy lỗi thân thiện.
             setSummarizeError(message); // Hiển thị lỗi.
         } finally {
             setIsSummarizing(false); // Tắt loading.
@@ -82,9 +84,9 @@ const MainAppPage: React.FC = () => {
                     <LogoIcon className="h-8 w-8 text-primary" />
                     <span className="text-xl font-bold text-gray-800 hidden sm:inline">LReg</span>
                 </div>
-                <div className="text-lg font-semibold text-gray-700 hidden md:block">AI Communication Assistant</div>
+                <div className="text-lg font-semibold text-gray-700 hidden md:block">{t('app.header.title')}</div>
                 <button onClick={() => navigateTo(Page.Landing)} className="text-sm font-medium text-gray-600 hover:text-primary px-4 py-2 rounded-lg hover:bg-gray-100 transition">
-                    Back to Home
+                    {t('app.header.backToHome')}
                 </button>
             </header>
 

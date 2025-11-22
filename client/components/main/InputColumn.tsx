@@ -5,19 +5,21 @@ import FileUploadInput from './AudioInput';
 import TextInput from './TextInput';
 import { VideoIcon, UploadCloudIcon, TypeIcon } from '../common/Icons';
 import { uploadVideoAndGetLabel, uploadVideoInChunks } from '../../api';
+import { useTranslation } from 'react-i18next';
 
 interface InputColumnProps {
     onNewAIMessage: (text: string) => void;
 }
 
 const InputColumn: React.FC<InputColumnProps> = ({ onNewAIMessage }) => {
+    const { t } = useTranslation();
     const [inputMode, setInputMode] = useState<InputMode>('video');
     const [showAdvanced, setShowAdvanced] = useState(false);
 
     const handleSendVideoToAI = async (blob: Blob) => {
         try {
             // Hiển thị thông báo bắt đầu
-            onNewAIMessage(' Đang xử lý video...');
+            onNewAIMessage(` ${t('app.messages.processing')}`);
             
             const collectedWords: string[] = [];
             
@@ -25,36 +27,36 @@ const InputColumn: React.FC<InputColumnProps> = ({ onNewAIMessage }) => {
             await uploadVideoInChunks(blob, (current, total, label) => {
                 collectedWords.push(label);
                 // Cập nhật real-time
-                const progressText = ` Đang xử lý đoạn ${current}/${total}: "${label}"\n\n` +
-                                   `Kết quả hiện tại: ${collectedWords.join(' ')}`;
+                const progressText = ` ${t('app.messages.processingSegment', { current, total, label })}\n\n` +
+                                   `${t('app.messages.currentResult', { result: collectedWords.join(' ') })}`;
                 onNewAIMessage(progressText);
             });
             
             // Hiển thị kết quả cuối cùng
-            const finalText = ` AI đã nhận diện xong!\n\n` +
-                            `Kết quả: "${collectedWords.join(' ')}"`;
+            const finalText = ` ${t('app.messages.completed')}\n\n` +
+                            `${t('app.messages.result', { result: collectedWords.join(' ') })}`;
             onNewAIMessage(finalText);
             
         } catch (error: any) {
             const message =
                 typeof error?.message === 'string'
                     ? error.message
-                    : 'An error occurred while processing the video.';
-            onNewAIMessage(`Sorry, something went wrong while processing the video: ${message}`);
+                    : t('app.messages.error', { message: 'Unknown error' });
+            onNewAIMessage(t('app.messages.error', { message }));
         }
     };
 
     const handleSendUploadedFileToAI = async (file: File) => {
         try {
             const label = await uploadVideoAndGetLabel(file); // Send uploaded file to backend.
-            const aiResponseText = `AI interpreted your file as: "${label}".`;
+            const aiResponseText = t('app.messages.result', { result: label });
             onNewAIMessage(aiResponseText);
         } catch (error: any) {
             const message =
                 typeof error?.message === 'string'
                     ? error.message
-                    : 'An error occurred while processing the file.';
-            onNewAIMessage(`Sorry, something went wrong while processing the file: ${message}`);
+                    : t('app.messages.error', { message: 'Unknown error' });
+            onNewAIMessage(t('app.messages.error', { message }));
         }
     };
     
@@ -63,19 +65,19 @@ const InputColumn: React.FC<InputColumnProps> = ({ onNewAIMessage }) => {
             <div className="bg-white p-2 rounded-xl shadow-md border border-gray-200">
                 <div className="flex space-x-1">
                     <TabButton
-                        label="Video"
+                        label={t('app.tabs.video')}
                         icon={<VideoIcon className="w-5 h-5 mr-2" />}
                         isActive={inputMode === 'video'}
                         onClick={() => setInputMode('video')}
                     />
                     <TabButton
-                        label="Upload File"
+                        label={t('app.tabs.upload')}
                         icon={<UploadCloudIcon className="w-5 h-5 mr-2" />}
                         isActive={inputMode === 'upload'}
                         onClick={() => setInputMode('upload')}
                     />
                     <TabButton
-                        label="Text"
+                        label={t('app.tabs.text')}
                         icon={<TypeIcon className="w-5 h-5 mr-2" />}
                         isActive={inputMode === 'text'}
                         onClick={() => setInputMode('text')}
@@ -94,7 +96,7 @@ const InputColumn: React.FC<InputColumnProps> = ({ onNewAIMessage }) => {
 
                     <div className="mt-6 border-t pt-6">
                         <button onClick={() => setShowAdvanced(!showAdvanced)} className="text-sm font-medium text-gray-600 hover:text-primary">
-                            {showAdvanced ? 'Hide' : 'Show'} advanced options
+                            {showAdvanced ? t('app.advanced.hide') : t('app.advanced.show')}
                         </button>
                         {showAdvanced && (
                             <div className="mt-4 grid sm:grid-cols-2 gap-4">

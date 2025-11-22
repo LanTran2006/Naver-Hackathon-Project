@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import Webcam from 'react-webcam';
 import { VideoIcon, SparklesIcon } from '../common/Icons';
 import { RecordingStatus } from '../../types';
+import { useTranslation } from 'react-i18next';
 
 interface VideoInputProps {
     onSendToAI: (blob: Blob) => Promise<void>;
 }
 
 const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
+    const { t } = useTranslation();
     const webcamRef = useRef<Webcam>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const recordedChunksRef = useRef<Blob[]>([]);
@@ -23,6 +25,7 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
     const [videoPreviewSrc, setVideoPreviewSrc] = useState<string | null>(null);
     const [showChunkCountdown, setShowChunkCountdown] = useState(false);
     const [chunkCountdown, setChunkCountdown] = useState(3);
+    const [audioEnabled, setAudioEnabled] = useState(false);
     const chunkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const handleCameraReady = () => {
@@ -106,10 +109,20 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
         setIsPaused(false);
         recordedChunksRef.current = [];
         
-        const stream = webcamRef.current?.stream || await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        const stream = webcamRef.current?.stream || await navigator.mediaDevices.getUserMedia({ 
+            video: true, 
+            audio: audioEnabled 
+        });
         if (!stream) return;
         
         streamRef.current = stream;
+        
+        // Mute audio tracks if audio is disabled
+        if (!audioEnabled && stream) {
+            stream.getAudioTracks().forEach(track => {
+                track.enabled = false;
+            });
+        }
         
         setStatus('countdown');
         setCountdown(2);
@@ -229,19 +242,42 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                         {!cameraReady ? (
                             <>
                                 <VideoIcon className="w-16 h-16 opacity-80 mx-auto" />
-                                <p className="text-lg font-semibold">Allow the browser to use your webcam for preview.</p>
+                                <p className="text-lg font-semibold">{t('app.video.allowCamera')}</p>
                                 {cameraError && <p className="text-sm text-red-200">{cameraError}</p>}
                             </>
                         ) : (
                             <>
                                 <VideoIcon className="w-12 h-12 opacity-80 mx-auto" />
-                                <p className="text-lg font-semibold">Ready to record</p>
+                                <p className="text-lg font-semibold">{t('app.video.readyToRecord')}</p>
+                                
+                                {/* Audio toggle */}
+                                <button
+                                    onClick={() => setAudioEnabled(!audioEnabled)}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${
+                                        audioEnabled 
+                                            ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        {audioEnabled ? (
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                        ) : (
+                                            <>
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                                <line x1="2" y1="2" x2="22" y2="22" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+                                            </>
+                                        )}
+                                    </svg>
+                                    {audioEnabled ? t('app.video.audioOn') : t('app.video.audioOff')}
+                                </button>
+                                
                                 <button
                                     onClick={handleStartRecording}
                                     disabled={!cameraReady || status !== 'idle'}
                                     className="bg-primary text-white font-semibold py-3 px-8 rounded-lg text-lg flex items-center justify-center gap-2 hover:bg-primary-hover transition disabled:bg-gray-500"
                                 >
-                                    Start recording
+                                    {t('app.video.startRecording')}
                                 </button>
                             </>
                         )}
@@ -249,7 +285,7 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                 )}
                 {status === 'countdown' && (
                     <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white">
-                        <p className="text-xl">Get ready...</p>
+                        <p className="text-xl">{t('app.video.getReady')}</p>
                         <p className="text-7xl font-bold">{countdown}</p>
                     </div>
                 )}
@@ -265,12 +301,26 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                             <span className="relative flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span></span>
                             <span>REC {recordingTime}s</span>
                         </div>
+                        {/* Audio status indicator */}
+                        <div className="absolute top-4 left-4 flex items-center space-x-2 bg-black/50 text-white px-3 py-1 rounded-full text-xs font-medium z-10">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                {audioEnabled ? (
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                ) : (
+                                    <>
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                        <line x1="2" y1="2" x2="22" y2="22" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+                                    </>
+                                )}
+                            </svg>
+                            <span>{audioEnabled ? 'Audio On' : 'Audio Off'}</span>
+                        </div>
                         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
                             <button
                                 onClick={handleStopRecording}
                                 className="bg-yellow-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-yellow-600 transition"
                             >
-                                Stop Recording
+                                {t('app.video.stopRecording')}
                             </button>
                         </div>
                     </>
