@@ -161,7 +161,13 @@
       "emptySubtitle": "Use an input method on the left to start a conversation.",
       "replyPlaceholder": "Reply here...",
       "errorMinMessages": "Need at least one exchange between Friend and AI to summarize.",
-      "errorSummarize": "Unable to summarize conversation at this time."
+      "errorSummarize": "Unable to summarize conversation at this time.",
+      "buildSentence": "Build Sentence",
+      "buildingSentence": "Building...",
+      "buildSentenceTooltip": "Build complete sentence from recognized words",
+      "sentenceBuilder": "Sentence Builder",
+      "errorNoWords": "No words to build sentence. Please recognize video first.",
+      "errorBuildSentence": "Unable to build sentence at this time."
     },
     "messages": {
       "processing": "Processing video...",

@@ -181,3 +181,27 @@ export async function summarizeConversation(conversation: string): Promise<strin
     }
 }
 
+/**
+ * Ghép các từ rời rạc thành câu hoàn chỉnh có nghĩa.
+ */
+export async function buildSentenceFromWords(words: string[]): Promise<string> {
+    if (words.length === 0) {
+        throw new Error('Không có từ nào để ghép thành câu.');
+    }
+
+    const wordsList = words.join(', ');
+    const prompt = [
+        'Bạn là trợ lý ngôn ngữ tiếng Việt.',
+        'Nhiệm vụ: Ghép các từ rời rạc sau thành một câu hoàn chỉnh, tự nhiên, có nghĩa.',
+        'Yêu cầu:',
+        '- Câu phải ngữ pháp đúng, có dấu câu',
+        '- Thêm từ nối nếu cần để câu tự nhiên',
+        '- Giữ nguyên ý nghĩa của các từ',
+        '- Trả về ONLY câu hoàn chỉnh, không giải thích',
+        '',
+        `Các từ: ${wordsList}`
+    ].join('\n');
+
+    const response = await callGemini(DEFAULT_MODEL, prompt);
+    return response.trim();
+}

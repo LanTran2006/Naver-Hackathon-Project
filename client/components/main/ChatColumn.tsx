@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'; // Import React hooks để quản lý UI.
 import { ChatMessage } from '../../types'; // Định nghĩa kiểu message.
-import { SendIcon, MicIcon, FileTextIcon } from '../common/Icons'; // Biểu tượng UI.
+import { SendIcon, MicIcon, FileTextIcon, SparklesIcon } from '../common/Icons'; // Biểu tượng UI.
 import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis'; // Hook đọc giọng.
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition'; // Hook nhận dạng giọng nói.
 import SpeechControls from './SpeechControls'; // Component popover bật/tắt đọc tự động.
@@ -11,9 +11,13 @@ interface ConversationColumnProps {
     onSendMessage: (text: string) => void;
     onSummarize: () => void;
     isSummarizing: boolean;
+
+    onBuildSentence?: () => void;
+    isBuildingSentence?: boolean;
+    hasCollectedWords?: boolean;
 }
 
-const ConversationColumn: React.FC<ConversationColumnProps> = ({ messages, onSendMessage, onSummarize, isSummarizing }) => {
+const ConversationColumn: React.FC<ConversationColumnProps> = ({ messages, onSendMessage, onSummarize, isSummarizing, onBuildSentence, isBuildingSentence = false, hasCollectedWords = false }) => {
     const { t } = useTranslation();
     const chatEndRef = useRef<HTMLDivElement>(null);
     const [inputText, setInputText] = useState(''); // State input người dùng.
@@ -128,6 +132,19 @@ const ConversationColumn: React.FC<ConversationColumnProps> = ({ messages, onSen
                         isSpeaking={isSpeaking}
                         onToggle={handleToggleSpeech}
                     />
+                    
+                    {onBuildSentence && (
+                        <button 
+                            onClick={onBuildSentence} 
+                            disabled={!hasCollectedWords || isBuildingSentence}
+                            className="flex items-center space-x-2 text-sm font-medium text-green-600 hover:bg-green-50 px-3 py-1.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            title={t('app.chat.buildSentenceTooltip') || 'Ghép các từ thành câu hoàn chỉnh'}
+                        >
+                            <SparklesIcon className="w-4 h-4" />
+                            <span>{isBuildingSentence ? t('app.chat.buildingSentence') || 'Đang ghép...' : t('app.chat.buildSentence') || 'Ghép câu'}</span>
+                        </button>
+                    )}
+
                     <button 
                         onClick={onSummarize} 
                         disabled={messages.length < 2 || isSummarizing}

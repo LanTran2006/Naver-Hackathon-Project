@@ -9,9 +9,10 @@ import { useTranslation } from 'react-i18next';
 
 interface InputColumnProps {
     onNewAIMessage: (text: string) => void;
+    onWordsCollected?: (words: string[]) => void; // Callback mới để pass words lên parent
 }
 
-const InputColumn: React.FC<InputColumnProps> = ({ onNewAIMessage }) => {
+const InputColumn: React.FC<InputColumnProps> = ({ onNewAIMessage, onWordsCollected }) => {
     const { t } = useTranslation();
     const [inputMode, setInputMode] = useState<InputMode>('video');
     const [showAdvanced, setShowAdvanced] = useState(false);
@@ -31,6 +32,10 @@ const InputColumn: React.FC<InputColumnProps> = ({ onNewAIMessage }) => {
                                    `${t('app.messages.currentResult', { result: collectedWords.join(' ') })}`;
                 onNewAIMessage(progressText);
             });
+            
+            if (onWordsCollected) {
+                onWordsCollected(collectedWords);
+            }
             
             // Hiển thị kết quả cuối cùng
             const finalText = ` ${t('app.messages.completed')}\n\n` +

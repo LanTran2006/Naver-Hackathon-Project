@@ -4,7 +4,7 @@ import { Page, ChatMessage } from '../types'; // Kiểu page/message.
 import InputColumn from '../components/main/InputColumn'; // Cột input.
 import ConversationColumn from '../components/main/ChatColumn'; // Cột chat.
 import { LogoIcon } from '../components/common/Icons'; // Logo.
-import { summarizeConversation } from '../services/gemini'; // Helper tóm tắt Gemini.
+import { buildSentenceFromWords, summarizeConversation } from '../services/gemini'; // Helper tóm tắt Gemini.
 import { useTranslation } from 'react-i18next';
 import Logo from '../components/images/talksign-logo.webp';
 
@@ -17,6 +17,9 @@ const MainAppPage: React.FC = () => {
     const [summarizeError, setSummarizeError] = useState<string | null>(null); // Lưu lỗi summarize.
     const messageIdCounter = React.useRef(0); // Counter để tạo unique ID
 
+    const [lastCollectedWords, setLastCollectedWords] = useState<string[]>([]);
+    const [isBuildingSentence, setIsBuildingSentence] = useState(false);
+    
     const handleNewAIMessage = (text: string) => {
         messageIdCounter.current += 1;
         const newMessage: ChatMessage = {
@@ -78,6 +81,39 @@ const MainAppPage: React.FC = () => {
         }
     };
 
+    const handleWordsCollected = (words: string[]) => {
+        setLastCollectedWords(words);
+    };
+
+    const handleBuildSentence = async () => {
+        if (lastCollectedWords.length === 0) {
+            setSummarizeError(t('app.chat.errorNoWords') || 'Không có từ nào để ghép câu.');
+            return;
+        }
+
+        setIsBuildingSentence(true);
+        setSummarizeError(null);
+
+        try {
+            const builtSentence = await buildSentenceFromWords(lastCollectedWords);
+            
+            const sentenceMessage: ChatMessage = {
+                id: `built-sentence-${Date.now()}`,
+                sender: t('app.chat.sentenceBuilder') || 'Sentence Builder',
+                text: builtSentence,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+            
+            setMessages(prev => [...prev, sentenceMessage]);
+            
+        } catch (error) {
+            const message = (error as Error)?.message || t('app.chat.errorBuildSentence') || 'Không thể ghép câu.';
+            setSummarizeError(message);
+        } finally {
+            setIsBuildingSentence(false);
+        }
+    };
+    
     return (
         <div className="h-screen w-screen bg-gray-50 flex flex-col">
             <header className="bg-white border-b border-gray-200 px-4 h-16 flex-shrink-0 flex items-center justify-between z-10">
@@ -92,7 +128,7 @@ const MainAppPage: React.FC = () => {
 
             <main className="flex-grow flex-1 flex flex-col md:flex-row overflow-hidden">
                 <div className="w-full md:w-1/2 lg:w-3/5 h-full overflow-y-auto p-4 sm:p-6 lg:p-8">
-                    <InputColumn onNewAIMessage={handleNewAIMessage} />
+                    <InputColumn onNewAIMessage={handleNewAIMessage} onWordsCollected={handleWordsCollected} />
                 </div>
                 <div className="w-full md:w-1/2 lg:w-2/5 h-full flex flex-col">
                     {summarizeError && (
@@ -100,12 +136,15 @@ const MainAppPage: React.FC = () => {
                             {summarizeError}
                         </div>
                     )}
-                    <ConversationColumn 
-                        messages={messages} 
-                        onSendMessage={handleNewFriendMessage} 
-                        onSummarize={handleSummarize}
-                        isSummarizing={isSummarizing}
-                    />
+                <ConversationColumn 
+                    messages={messages} 
+                    onSendMessage={handleNewFriendMessage} 
+                    onSummarize={handleSummarize}
+                    isSummarizing={isSummarizing}
+                    onBuildSentence={handleBuildSentence}
+                    isBuildingSentence={isBuildingSentence}
+                    hasCollectedWords={lastCollectedWords.length > 0}
+                />
                 </div>
             </main>
         </div>
