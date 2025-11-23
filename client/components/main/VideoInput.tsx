@@ -315,15 +315,18 @@ const VideoInput: React.FC<VideoInputProps> = ({ onSendToAI }) => {
                             </svg>
                             <span>{audioEnabled ? 'Audio On' : 'Audio Off'}</span>
                         </div>
-                        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
-                            <button
-                                onClick={handleStopRecording}
-                                className="bg-yellow-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-yellow-600 transition"
-                            >
-                                {t('app.video.stopRecording')}
-                            </button>
-                        </div>
                     </>
+                )}
+                {/* Nút Stop luôn hiển thị khi đang recording */}
+                {status === 'recording' && !isPaused && (
+                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-30">
+                        <button
+                            onClick={handleStopRecording}
+                            className="bg-yellow-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-yellow-600 transition shadow-lg"
+                        >
+                            {t('app.video.stopRecording')}
+                        </button>
+                    </div>
                 )}
                 {status === 'recording' && isPaused && (
                     <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white space-y-4 z-10">
