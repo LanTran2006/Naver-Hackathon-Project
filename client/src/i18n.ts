@@ -5,6 +5,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import enTranslation from '../locales/en/translation.json';
 import viTranslation from '../locales/vi/translation.json';
 
+
 const resources = {
   en: {
     translation: enTranslation,
